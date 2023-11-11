@@ -305,7 +305,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "doc['up_score'].value / (-1 * doc['down_score'].value + doc['up_score'].value +1)",
+            source: "69*doc['up_score'].value / (-1 * doc['down_score'].value + doc['up_score'].value +1)*420",
           },
         },
       }
