@@ -8,6 +8,8 @@ class TagNameValidator < ActiveModel::EachValidator
       record.errors.add(attribute,  "'#{value}' cannot contain asterisks ('*')")
     when /,/
       record.errors.add(attribute,  "'#{value}' cannot contain commas (',')")
+    when /[{}]/
+      record.errors.add(attribute,  "'#{value}' cannot contain grouping symbols ( '{' or '}' )")
     when /#/
       record.errors.add(attribute,  "'#{value}' cannot contain octothorpes ('#')")
     when /\$/
@@ -30,7 +32,7 @@ class TagNameValidator < ActiveModel::EachValidator
       record.errors.add(attribute, "'#{value}' cannot contain consecutive underscores, hyphens or tildes")
     when /[^[:graph:]]/
       record.errors.add(attribute, "'#{value}' cannot contain non-printable characters")
-    when /\A[-~+_`(){}\[\]\/]/
+    when /\A[-~+_`()\[\]\/]/
       record.errors.add(attribute, "'#{value}' cannot begin with a '#{value[0]}'")
     when /\A(#{TagQuery::METATAGS.join("|")}):(.+)\z/i
       record.errors.add(attribute, "'#{value}' cannot begin with '#{$1}:'")
