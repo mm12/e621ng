@@ -693,9 +693,9 @@ class Post < ApplicationRecord
         when /^source:(.*)$/i
           self.source = $1
         when /^\+source:"(.*)"$/i
-          self.source = self.source+"\n"+$1
+          self.source = "#{self.source}\n#{$1}"
         when /^\+source:(.*)$/i
-          self.source = self.source+"\n"+$1
+          self.source = "#{self.source}\n#{$1}"
         when /^newpool:(.+)$/i
           pool = Pool.find_by_name($1)
           if pool.nil?
