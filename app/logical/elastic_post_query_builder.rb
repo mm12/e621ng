@@ -285,6 +285,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     when /(#{TagCategory::SHORT_NAME_REGEX})tags_asc/
       order.push({"tag_count_#{TagCategory::SHORT_NAME_MAPPING[$1]}" => :asc})
 
+
+
     when "rank"
       @function_score = {
         script_score: {
@@ -296,6 +298,17 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       }
       must.push({ range: { score: { gt: 0 } } })
       must.push({ range: { created_at: { gte: 2.days.ago } } })
+      order.push({ _score: :desc })
+
+
+    when "score_ratio"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "69*doc['up_score'].value / (-1 * doc['down_score'].value + doc['up_score'].value +1)*420",
+          },
+        },
+      }
       order.push({ _score: :desc })
 
     when "random"
