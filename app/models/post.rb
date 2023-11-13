@@ -355,7 +355,7 @@ class Post < ApplicationRecord
 
       alternate_processors = []
       sources.map! do |src|
-        src.unicode_normalize!(:nfc)
+        src.unidocker exec -it e621ng-e621-1 rails ccode_normalize!(:nfc)
         src = src.try(:strip)
         alternate = Sources::Alternates.find(src)
         alternate_processors << alternate
@@ -366,7 +366,7 @@ class Post < ApplicationRecord
         alternate.original_url
       end
       sources = (sources + submission_sources + gallery_sources + direct_sources + additional_sources).compact.reject{ |e| e.strip.empty? }.uniq
-      alternate_processors.each do |alt_processor|
+      alternate_processors.eacdocker exec -it e621ng-e621-1 rails ch do |alt_processor|
         sources = alt_processor.remove_duplicates(sources)
       end
 
@@ -693,15 +693,15 @@ class Post < ApplicationRecord
         when /^source:(.*)$/i
           self.source = $1
         when /^\+source:"(.*)"$/i
-          self.source = self.source+"\n"+$1
+          self.source = "#{self.source}\n#{$1}"
         when /^\+source:(.*)$/i
-          self.source = self.source+"\n"+$1
+          self.source = "#{self.source}\n#{$1}"
         when /^\-source:"(.*)"$/i
-          temp = "\n"+self.source+"\n"
-          self.source = temp.sub("\n"+$1+"\n","\n")
+          temp = "\n#{self.source}\n"
+          self.source = temp.sub("\n#{$1}\n","\n")
         when /^\-source:(.*)$/i
-          temp = "\n"+self.source+"\n"
-          self.source = temp.sub("\n"+$1+"\n","\n")
+          temp = "\n#{self.source}\n"
+          self.source = temp.sub("\n#{$1}\n","\n")
         when /^newpool:(.+)$/i
           pool = Pool.find_by_name($1)
           if pool.nil?
