@@ -696,12 +696,12 @@ class Post < ApplicationRecord
           self.source = "#{self.source}\n#{$1}"
         when /^\+source:(.*)$/i
           self.source = "#{self.source}\n#{$1}"
-        when /^\-source:"(.*)"$/i
-          temp = "\n#{self.source}\n"
-          self.source = temp.sub("\n#{$1}\n","\n")
-        when /^\-source:(.*)$/i
-          temp = "\n#{self.source}\n"
-          self.source = temp.sub("\n#{$1}\n","\n")
+        # when /^\-source:"(.*)"$/i
+        #   temp = "\n#{self.source}\n"
+        #   self.source = temp.sub("\n#{$1}\n","\n")
+        # when /^\-source:(.*)$/i
+        #   temp = "\n#{self.source}\n"
+        #   self.source = temp.sub("\n#{$1}\n","\n")
         when /^newpool:(.+)$/i
           pool = Pool.find_by_name($1)
           if pool.nil?
