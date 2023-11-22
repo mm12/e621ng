@@ -1,12 +1,24 @@
 require 'csv'
-CurrentUser.user=user.find(1)
+ActiveRecord::Base.logger.level = 1
+CurrentUser.user=User.find(1)
 CurrentUser.ip_addr = '0.0.0.0'
+latest = "posts-2023-11-21.csv"
 def do_import(fileName='sampleData.csv')
-  csv_text = File.read(Rails.root.join('db', '', fileName))
-  csv = CSV.parse(csv_text, :headers => true)
-  csv.each_entry do |row|
-    t=as_post(row)
-    t.save
+  #puts("Trying to open #{fileName}")
+  #csv_text = File.read(Rails.root.join('db', '', fileName))
+  #puts("Opened, making CSV")
+  #csv = CSV.parse(csv_text, :headers => true)
+  #puts("Importing posts:")
+  ActiveRecord::Base.logger.silence(Logger::ERROR) do
+    CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
+    #csv.each_entry do |row|
+      if (Post.last.id >row['id'].to_i) 
+        next 
+      end
+      t=as_post(row)
+      t.save
+  end
+    puts(t.id)
     #puts(Post.find(t.id))
     #UploadService?
   end
@@ -19,7 +31,7 @@ end
     t.up_score = row['up_score']
     t.down_score = row['down_score']
     t.score = row['score']
-    t.source = ''#row['source']
+    t.source = row['source']
     t.md5 = row['md5']
     t.rating = row['rating']
     t.is_note_locked = row['is_note_locked']
@@ -28,7 +40,7 @@ end
     t.uploader_id = 2 #row['uploader_id']
     t.image_width = row['image_width']
     t.image_height = row['image_height']
-    t.tag_string = ""#row['tag_string']
+    t.tag_string = row['tag_string']
     t.locked_tags = ""#row['locked_tags']
     t.fav_count = row['fav_count']
     t.file_ext = row['file_ext']
