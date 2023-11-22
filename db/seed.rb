@@ -1,41 +1,35 @@
 require 'csv'
-ActiveRecord::Base.logger.level = 1
+#ActiveRecord::Base.logger.level = 1
 CurrentUser.user=User.find(1)
 CurrentUser.ip_addr = '0.0.0.0'
 latestPosts = "posts-2023-11-21.csv"
 def do_import_posts(fileName='sampleData.csv')
-  #puts("Trying to open #{fileName}")
-  #csv_text = File.read(Rails.root.join('db', '', fileName))
-  #puts("Opened, making CSV")
-  #csv = CSV.parse(csv_text, :headers => true)
-  #puts("Importing posts:")
   ActiveRecord::Base.logger.silence(Logger::ERROR) do
     CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
-    #csv.each_entry do |row|
       if (Post.last.id >row['id'].to_i) 
         next 
       end
       t=as_post(row)
       t.save
-  end
-    puts(t.id)
-    #puts(Post.find(t.id))
-    #UploadService?
+    end
   end
 end
 
 latestImply = "tag_implications-2023-11-21.csv"
 def do_import_imply(fileName)
-
-  ActiveRecord::Base.logger.silence(Logger::ERROR) do
+  ActiveRecord::Base.logger.silence(Logger::WARN) do
     CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
       if (TagImplication.last.id >row['id'].to_i) 
         next 
       end
       t=to_imply(row)
       t.save
-  end
-    puts(t.id)
+      if(t.id % 5000 ==0)
+        warn t.id #puts(t.id)
+    end
+    
+    end
+    
   end
 end
 
