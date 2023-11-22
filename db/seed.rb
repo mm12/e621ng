@@ -2,8 +2,8 @@ require 'csv'
 ActiveRecord::Base.logger.level = 1
 CurrentUser.user=User.find(1)
 CurrentUser.ip_addr = '0.0.0.0'
-latest = "posts-2023-11-21.csv"
-def do_import(fileName='sampleData.csv')
+latestPosts = "posts-2023-11-21.csv"
+def do_import_posts(fileName='sampleData.csv')
   #puts("Trying to open #{fileName}")
   #csv_text = File.read(Rails.root.join('db', '', fileName))
   #puts("Opened, making CSV")
@@ -23,6 +23,22 @@ def do_import(fileName='sampleData.csv')
     #UploadService?
   end
 end
+
+latestImply = "tag_implications-2023-11-21.csv"
+def do_import_imply(fileName)
+
+  ActiveRecord::Base.logger.silence(Logger::ERROR) do
+    CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
+      if (TagImplication.last.id >row['id'].to_i) 
+        next 
+      end
+      t=to_imply(row)
+      t.save
+  end
+    puts(t.id)
+  end
+end
+
   def as_post(row)
     t = Post.new
     t.id = row['id']
@@ -78,3 +94,14 @@ end
     return t
   end
 
+  def to_imply(row)
+    t = TagImplication.new
+    t.id = row['id']
+    t.antecedent_name = row['antecedent_name']
+    t.consequent_name = row['consequent_name']
+    t.created_at = row['created_at']
+    t.status = row['status']
+    t.creator_id = 2
+    t.creator_ip_addr = '0.0.0.0'
+    return t
+  end
