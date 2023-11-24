@@ -2,21 +2,33 @@ require 'csv'
 #ActiveRecord::Base.logger.level = 1
 CurrentUser.user=User.find(1)
 CurrentUser.ip_addr = '0.0.0.0'
-latestPosts = "posts-2023-11-21.csv"
-def do_import_posts(fileName='sampleData.csv')
+latest = "2023-11-21"
+def do_import_posts(date)
+  fileName = "posts-#{date}.csv"
   ActiveRecord::Base.logger.silence(Logger::ERROR) do
+    warn "#{DateTime.now} ::: begining"
+    diff = DateTime.now
+    last_processed = Post.last.id
     CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
-      if (Post.last.id >row['id'].to_i) 
+      next if (last_processed >row['id'].to_i) 
+      if (last_processed ==row['id'].to_i) 
+        warn "#{DateTime.now} ::: STARTING AFTER #{row['id']}\t#{TimeDiff(diff)}"
+        diff = DateTime.now
         next 
       end
       t=as_post(row)
       t.save
+      if(row['id'].to_i % 5000 ==0)
+        warn "#{DateTime.now} ::: #{t.id}\t#{TimeDiff(diff)}" #puts(t.id)
+        diff=DateTime.now
+        warn ((t.id.to_f / 4430739.to_f)*100)
+      end
     end
   end
 end
 
-latestImply = "tag_implications-2023-11-21.csv"
-def do_import_imply(fileName)
+def do_import_imply(date)
+  fileName = "tag_implications-#{date}.csv"
   ActiveRecord::Base.logger.silence(Logger::WARN) do
     CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
       if (TagImplication.last.id >row['id'].to_i) 
@@ -26,13 +38,45 @@ def do_import_imply(fileName)
       t.save
       if(t.id % 5000 ==0)
         warn t.id #puts(t.id)
-    end
+      end
     
     end
     
   end
 end
 
+def do_import_alias(date)
+  fileName = "tag_aliases-#{date}.csv"
+  ActiveRecord::Base.logger.silence(Logger::WARN) do
+    CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
+      if (TagAlias.last.id >row['id'].to_i) 
+        next 
+      end
+      t=to_alias(row)
+      t.save
+      if(t.id % 5000 ==0)
+        warn t.id #puts(t.id)
+      end
+    
+    end
+    
+  end
+end
+
+def do_import_tag(date)
+  fileName = "tags-#{date}.csv"
+  ActiveRecord::Base.logger.silence(Logger::WARN) do
+    CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
+      t=to_tag(row)
+      t.save
+      if(row['id'].to_i % 5000 ==0)
+        warn t.id #puts(t.id)
+      end
+    
+    end
+    
+  end
+end
   def as_post(row)
     t = Post.new
     t.id = row['id']
@@ -98,4 +142,25 @@ end
     t.creator_id = 2
     t.creator_ip_addr = '0.0.0.0'
     return t
+  end
+  def to_alias(row)
+    t = TagAlias.new
+    t.id = row['id']
+    t.antecedent_name = row['antecedent_name']
+    t.consequent_name = row['consequent_name']
+    t.created_at = row['created_at']
+    t.status = row['status']
+    t.creator_id = 2
+    t.creator_ip_addr = '0.0.0.0'
+    return t
+  end
+  def to_tag(row)
+    t = Tag.find_or_create_by_name(row['name'])
+    t.category = row['category']
+    return t
+  end
+
+  def TimeDiff(oldTime)
+    diff = DateTime.now - oldTime
+    return Time.at(diff.days.seconds.to_i).utc.strftime("%H:%M:%S")
   end
