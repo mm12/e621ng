@@ -8,13 +8,13 @@ latest = "2023-11-21"
 
 def do_import_posts(date)
   totalPosts = 4430739
-
   fileName = "posts-#{date}.csv"
   ActiveRecord::Base.logger.silence(Logger::ERROR) do
     warn "#{DateTime.now} ::: begining"
     diff = DateTime.now
     last_processed = Post.last.id
     CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
+      begin
       next if (last_processed >row['id'].to_i) 
       if (last_processed ==row['id'].to_i) 
         do_progress(row['id'], totalPosts, diff)
@@ -22,29 +22,45 @@ def do_import_posts(date)
         diff = DateTime.now
         next 
       end
+      if(((row['id'].to_i) % 5000) ==0)
+        warn "#{DateTime.now} ::: #{row['id']}\t#{TimeDiff(diff)}" #puts(t.id)
+        diff=DateTime.now
+        warn (((row['id'].to_f) / (4430739.to_f))*100).round(3)
+      end
       t=as_post(row)
       t.save
-      if(row['id'].to_i % 5000 ==0)
-        warn "#{DateTime.now} ::: #{t.id}\t#{TimeDiff(diff)}" #puts(t.id)
-        diff=DateTime.now
-        warn ((t.id.to_f / 4430739.to_f)*100)
-      end
+    rescue ActiveRecord::RecordNotUnique => e
+      #warn e
+      next
+    end
+    rescue ActiveRecord::RecordInvalid => e
+      #warn e
+      next
     end
   end
 end
 def do_import_imply(date)
   totalImply = 52697
-
   fileName = "tag_implications-#{date}.csv"
   ActiveRecord::Base.logger.silence(Logger::WARN) do
     diff = DateTime.now
     CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
-      next if (TagImplication.last.id >row['id'].to_i) 
-      t=to_imply(row)
-      t.save
-      diff=do_every(diff,t.id,totalImply,5000)
-    end
-    
+      begin 
+        next if (TagImplication.last.id >=row['id'].to_i) 
+        t=to_imply(row).save!
+        rescue ActiveRecord::RecordNotUnique => e
+          #warn e
+          next
+        end
+        rescue ActiveRecord::RecordInvalid => e
+          #warn e
+          next
+        end
+        if(row["id"]%5000 == 0) 
+          warn (do_progress(row["id"], totalImply,diff))
+          diff = DateTime.now
+        end
+        diff=do_every(diff,t.id,totalImply,5000)
   end
 end
 def do_import_alias(date)
@@ -54,13 +70,20 @@ def do_import_alias(date)
     diff = DateTime.now
     last = TagAlias.last.id
     CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
-      next if (last >row['id'].to_i) 
-      t=to_alias(row)
-      t.save
-      diff=do_every(diff,t.id,totalAlias)  
+    begin 
+        next if (last >=(row['id'].to_i))
+        to_alias(row).save!
+      rescue ActiveRecord::RecordNotUnique => e
+        #warn e
+        next
+      end
+      rescue ActiveRecord::RecordInvalid => e
+        #warn e
+        next
+      end
+      #t.save!
+      diff=do_every(diff,row['id'],totalAlias)  
     end
-    
-  end
 end
 
 def do_import_tag(date)
@@ -70,18 +93,19 @@ def do_import_tag(date)
   diff = DateTime.now
   ActiveRecord::Base.logger.silence(Logger::WARN) do
     CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
-      next if last >= row['id'].to_i
-      t=to_tag(row)
-      t.save
+      next if (last > (row['id'].to_i))
       if(row['id']%5000 == 0)
-        warn do_progress(row['id'],totalTags,diff)
+        warn "#{TimeDiff(diff)}"
+        warn "#{DateTime.now}\t#{row['id']}\t"
+        warn "#{((row['id'].to_f / totalTags.to_f)*100).round(3)}"
         diff = DateTime.now
       end
-      #diff = do_every(diff,t.id,totalTags)   
+      t=to_tag(row)
+      t.save
     end
-    
   end
 end
+
 def as_post(row)
   t = Post.new
   t.id = row['id']
@@ -137,7 +161,7 @@ def as_post(row)
   return t
 end
 def to_imply(row)
-  t = TagImplication.new
+  t = TagImplication.create
   t.id = row['id']
   t.antecedent_name = row['antecedent_name']
   t.consequent_name = row['consequent_name']
@@ -168,7 +192,7 @@ def to_tag(row)
   return t
 end
 def do_progress(currentID, tq, lastCall)
-  return "#{DateTime.now} :: (#{TimeDiff(diff)}) \t#{currentID}\t#{((currentID.to_f / tq.to_f)*100).round(3)}"
+  return "#{DateTime.now} :: (#{TimeDiff(lastCall)}) \t#{currentID}\t#{((currentID.to_f / tq.to_f)*100).round(3)}"
 end
 def TimeDiff(oldTime)
   diff = DateTime.now - oldTime
@@ -180,4 +204,52 @@ def do_every(lastDone, currentID, totals, interval=5000)
   end 
   do_progress(currentID,totals,lastDone)
   return DateTime.now
+end
+
+def make_pool(row)
+  t = Pool.new 
+  t.id=row["id"]
+  t.creator_id=2
+  t.name = (row['name'])
+  t.category = row['category']
+  t.is_active = row["is_active"]
+  t.category = row["category"]
+  t.post_ids = row["post_ids"]
+  return t
+end
+
+def do_import_pool(date)
+  totalPools = 37654
+  fileName = "pools-#{date}.csv"
+  #last = Tag.last.id
+  #diff = DateTime.now
+  ActiveRecord::Base.logger.silence(Logger::WARN) do
+    CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
+      #next if (last >= (row['id'].to_i))
+      make_pool(row).save
+    end
+  end
+end
+
+
+
+def make_page(row)
+  t = WikiPage.new 
+  t.id=row["id"]
+  t.creator_id=2
+  t.is_locked = (row['is_locked'])
+  t.body = row['body']
+  t.title = row["title"]
+  return t
+end
+
+def do_import_pages(date)
+  totalPools = 55177
+  fileName = "wiki_pages-#{date}.csv"
+  ActiveRecord::Base.logger.silence(Logger::WARN) do
+    CSV.foreach(Rails.root.join('db', '', fileName),headers:true) do |row|
+      #next if (last >= (row['id'].to_i))
+      make_page(row).save
+    end
+  end
 end
