@@ -298,6 +298,19 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       must.push({ range: { created_at: { gte: 2.days.ago } } })
       order.push({ _score: :desc })
 
+    when "dynrank"
+      @function_score = {
+        script_score: {
+          script: {
+            params: { log3: Math.log(3), date2005_05_24: 1_116_936_000 },
+            source: "Math.log(doc['score'].value) / params.log3 + (doc['created_at'].value.millis / 1000 - params.date2005_05_24) / 35000",
+          },
+        },
+      }
+      must.push({ range: { score: { gt: 0 } } })
+      must.push({ range: { created_at: { gte: (Post.last.created_at-2.days) } } })
+      order.push({ _score: :desc })
+
     when "score_ratio"
       @function_score = {
         script_score: {
@@ -313,12 +326,20 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(69*doc['up_score'].value+doc['fav_count'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))*420",
+            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))*420",
           },
         },
       }
       order.push({ _score: :desc })
-      
+    when "new_fs"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)+(#{Post.count}))*420",
+          },
+        },
+      }
+      order.push({ _score: :desc })  
     
     when "random"
       if q[:random_seed].present?
