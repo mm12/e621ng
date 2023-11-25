@@ -430,8 +430,6 @@ class User < ApplicationRecord
   end
 
   module LimitMethods
-    extend Memoist
-
     def younger_than(duration)
       return false if Danbooru.config.disable_age_checks?
       created_at > duration.ago
@@ -554,41 +552,39 @@ class User < ApplicationRecord
     end
 
     def hourly_upload_limit
-      post_count = posts.where("created_at >= ?", 1.hour.ago).count
-      replacement_count = can_approve_posts? ? 0 : post_replacements.where("created_at >= ? and status != ?", 1.hour.ago, "original").count
-      Danbooru.config.hourly_upload_limit - post_count - replacement_count
+      @hourly_upload_limit ||= begin
+        post_count = posts.where("created_at >= ?", 1.hour.ago).count
+        replacement_count = can_approve_posts? ? 0 : post_replacements.where("created_at >= ? and status != ?", 1.hour.ago, "original").count
+        Danbooru.config.hourly_upload_limit - post_count - replacement_count
+      end
     end
-    memoize :hourly_upload_limit
 
     def upload_limit
       pieces = upload_limit_pieces
-
       base_upload_limit + (pieces[:approved] / 10) - (pieces[:deleted] / 4) - pieces[:pending]
     end
-    memoize :upload_limit
 
     def upload_limit_pieces
-      deleted_count = Post.deleted.for_user(id).count
-      rejected_replacement_count = post_replacement_rejected_count
-      replaced_penalize_count = own_post_replaced_penalize_count
-      unapproved_count = Post.pending_or_flagged.for_user(id).count
-      unapproved_replacements_count = post_replacements.pending.count
-      approved_count = Post.for_user(id).where('is_flagged = false AND is_deleted = false AND is_pending = false').count
+      @upload_limit_pieces ||= begin
+        deleted_count = Post.deleted.for_user(id).count
+        rejected_replacement_count = post_replacement_rejected_count
+        replaced_penalize_count = own_post_replaced_penalize_count
+        unapproved_count = Post.pending_or_flagged.for_user(id).count
+        unapproved_replacements_count = post_replacements.pending.count
+        approved_count = Post.for_user(id).where(is_flagged: false, is_deleted: false, is_pending: false).count
 
-      {
-        deleted: deleted_count + replaced_penalize_count + rejected_replacement_count,
-        deleted_ignore: own_post_replaced_count - replaced_penalize_count,
-        approved: approved_count,
-        pending: unapproved_count + unapproved_replacements_count
-      }
+        {
+          deleted: deleted_count + replaced_penalize_count + rejected_replacement_count,
+          deleted_ignore: own_post_replaced_count - replaced_penalize_count,
+          approved: approved_count,
+          pending: unapproved_count + unapproved_replacements_count,
+        }
+      end
     end
-    memoize :upload_limit_pieces
 
     def post_upload_throttle
-      return hourly_upload_limit if is_privileged?
-      [hourly_upload_limit, post_edit_limit].min
+      @post_upload_throttle ||= is_privileged? ? hourly_upload_limit : [hourly_upload_limit, post_edit_limit].min
     end
-    memoize :post_upload_throttle
 
     def tag_query_limit
       Danbooru.config.tag_query_limit
@@ -902,5 +898,23 @@ class User < ApplicationRecord
 
   def presenter
     @presenter ||= UserPresenter.new(self)
+  end
+
+  # Copied from UserNameValidator. Check back later how effective this was.
+  # Users with invalid names may be automatically renamed in the future.
+  def name_error
+    if name.length > 20
+      "must be 2 to 20 characters long"
+    elsif name !~ /\A[a-zA-Z0-9\-_~']+\z/
+      "must contain only alphanumeric characters, hypens, apostrophes, tildes and underscores"
+    elsif name =~ /\A[_\-~']/
+      "must not begin with a special character"
+    elsif name =~ /_{2}|-{2}|~{2}|'{2}/
+      "must not contain consecutive special characters"
+    elsif name =~ /\A_|_\z/
+      "cannot begin or end with an underscore"
+    elsif name =~ /\A[0-9]+\z/
+      "cannot consist of numbers only"
+    end
   end
 end
