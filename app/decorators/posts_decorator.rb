@@ -71,11 +71,13 @@ class PostsDecorator < ApplicationDecorator
 
     post_score_icon = "#{'↑' if post.score > 0}#{'↓' if post.score < 0}#{'↕' if post.score == 0}"
     score = t.tag.span("#{post_score_icon}#{post.score}", class: "post-score-score #{score_class(post.score)}")
+    scoreu = t.tag.span("#{post.up_score}", class: "post-score-score")
+    scored = t.tag.span("#{post.down_score}", class: "post-score-score")
     favs = t.tag.span("♥#{post.fav_count}", class: "post-score-faves")
     comments = t.tag.span "C#{post.visible_comment_count(CurrentUser)}", class: 'post-score-comments'
     rating =  t.tag.span(post.rating.upcase, class: "post-score-rating")
     status = t.tag.span(status_flags.join(''), class: 'post-score-extras')
-    t.tag.div score + favs + comments + rating + status, class: 'post-score', id: "post-score-#{post.id}"
+    t.tag.div scoreu + scored + score + favs + comments + rating + status, class: 'post-score', id: "post-score-#{post.id}"
   end
 
   def preview_html(t, options = {})
