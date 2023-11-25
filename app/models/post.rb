@@ -101,7 +101,7 @@ class Post < ApplicationRecord
     end
 
     def file_url
-      storage_manager.file_url(self, :original)
+      storage_manager.file_url(self, :original).sub! "http://localhost:3000","https://e621.net"
     end
 
     def file_url_ext(ext)
@@ -118,7 +118,7 @@ class Post < ApplicationRecord
     end
 
     def preview_file_url
-      storage_manager.file_url(self, :preview)
+      storage_manager.file_url(self, :preview).sub! "http://localhost:3000","https://e621.net"
     end
 
     def reverse_image_url

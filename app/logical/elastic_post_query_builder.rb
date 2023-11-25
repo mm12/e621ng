@@ -308,6 +308,18 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       }
       order.push({ _score: :desc })
 
+
+    when "score_favs"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(69*doc['up_score'].value+doc['fav_count'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))*420",
+          },
+        },
+      }
+      order.push({ _score: :desc })
+      
+    
     when "random"
       if q[:random_seed].present?
         @function_score = {
