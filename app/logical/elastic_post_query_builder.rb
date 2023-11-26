@@ -175,6 +175,10 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       must.push({term: {has_pending_replacements: q[:pending_replacements]}})
     end
 
+    if q.include?(:has_disapproval)
+      must.push({term: {has_disapprovals: q[:has_disapproval]}})
+    end
+
     add_tag_string_search_relation(q[:tags])
 
     case q[:order]
@@ -225,6 +229,12 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
 
     when "updated_asc"
       order.concat([{updated_at: :asc}, {id: :asc}])
+
+    when "up_score"
+      order.concat([{up_score: :desc}, {id: :asc}])
+
+    when "down_score"
+      order.concat([{down_score: :asc}, {id: :asc}])
 
     when "comment", "comm"
       order.push({commented_at: {order: :desc, missing: :_last}})
@@ -331,6 +341,17 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
         },
       }
       order.push({ _score: :desc })
+
+    when "score_favs_B"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(21*doc['fav_count'].value+69*doc['up_score'].value+doc['comment_count'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))*420",
+          },
+        },
+      }
+      order.push({ _score: :desc })
+
     when "new_fs"
       @function_score = {
         script_score: {

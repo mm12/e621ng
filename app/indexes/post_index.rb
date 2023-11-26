@@ -72,6 +72,7 @@ module PostIndex
           deleted: { type: "boolean" },
           has_children: { type: "boolean" },
           has_pending_replacements: { type: "boolean" },
+          has_disapprovals: { type: "boolean" },
         },
       },
     }
@@ -140,14 +141,14 @@ module PostIndex
           SELECT post_id, body FROM notes
           WHERE post_id IN (#{post_ids})
         SQL
-        deletion_sql = <<-SQL
-          SELECT pf.post_id, pf.creator_id, LOWER(pf.reason) as reason FROM
-            (SELECT MAX(id) as mid, post_id
-             FROM post_flags
-             WHERE post_id IN (#{post_ids}) AND is_resolved = false AND is_deletion = true
-             GROUP BY post_id) pfi
-          INNER JOIN post_flags pf ON pf.id = pfi.mid;
-        SQL
+        #disapproval_sql = <<-SQL
+        #  SELECT pf.post_id, pf.creator_id, LOWER(pf.reason) as reason FROM
+        #    (SELECT MAX(id) as mid, post_id
+        #     FROM post_disapprovals
+        #     WHERE post_id IN (#{post_ids}) AND is_resolved = false AND is_deletion = true
+        #     GROUP BY post_id) pfi
+        #  INNER JOIN post_disapprovals pd ON pd.id = pfi.mid;
+        #SQL
         pending_replacements_sql = <<-SQL
           SELECT DISTINCT p.id, CASE WHEN pr.post_id IS NULL THEN false ELSE true END FROM posts p
             LEFT OUTER JOIN post_replacements2 pr ON p.id = pr.post_id AND pr.status = 'pending'
@@ -169,6 +170,9 @@ module PostIndex
         notes          = Hash.new { |h,k| h[k] = [] }
         conn.execute(note_sql).values.each { |p,b| notes[p] << b }
         pending_replacements = conn.execute(pending_replacements_sql).values.to_h
+        #disapprovals         = conn.execute(deletion_sql)
+        #disapprover_ids      = disapprovals.values.map {|p,did,dr| [p,did]}.to_h
+        #disapproval_reasons  = disapprovals.values.map {|p,did,dr| [p,dr]}.to_h
 
         # Special handling for votes to do it with one query
         vote_ids = conn.execute(votes_sql).values.map do |pid, uids, scores|
@@ -195,7 +199,8 @@ module PostIndex
             notes:         notes[p.id]          || empty,
             deleter:       deleter_ids[p.id]    || empty,
             del_reason:    del_reasons[p.id]    || empty,
-            has_pending_replacements: pending_replacements[p.id]
+            has_pending_replacements: pending_replacements[p.id],
+            has_disapprovals:         disapprovals[p.id]
           }
 
           {
@@ -274,7 +279,9 @@ module PostIndex
       pending:        is_pending,
       deleted:        is_deleted,
       has_children:   has_children,
-      has_pending_replacements: options.key?(:has_pending_replacements) ? options[:has_pending_replacements] : replacements.pending.any?
+      has_pending_replacements: options.key?(:has_pending_replacements) ? options[:has_pending_replacements] : replacements.pending.any?,
+      has_disapprovals: options.key?(:has_disapprovals)# ? options[:has_disapprovals] : disapprovals.pending.any?
+
     }
   end
 end
