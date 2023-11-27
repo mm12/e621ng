@@ -253,3 +253,11 @@ def do_import_pages(date)
     end
   end
 end
+def save_all
+  (1..Post.last.id).each do |n|
+    Post.find(n).save!
+    rescue ActiveRecord::RecordNotFound => e 
+      next
+  end
+end
+# pg_restore -a -C -F c -v -U e621 -h localhost -p 34517 -d e621_development <fileName.psql>
