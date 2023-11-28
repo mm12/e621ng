@@ -17,7 +17,7 @@ class TagQuery
   ] + TagCategory::SHORT_NAME_LIST.map { |tag_name| "#{tag_name}tags" }
 
   METATAGS = %w[
-    md5 order limit child randseed ratinglocked notelocked statuslocked
+    md5 order limit child randseed ratinglocked notelocked statuslocked custom
   ] + NEGATABLE_METATAGS + COUNT_METATAGS + BOOLEAN_METATAGS
 
   ORDER_METATAGS = %w[
@@ -274,7 +274,12 @@ class TagQuery
         q[:child] = g2.downcase
 
       when "randseed"
+        #Logger.new('log/dev.log').info("seed:#{g2.to_i}")
         q[:random_seed] = g2.to_i
+
+      when "custom"
+        q[:custom_order] = g2.to_s
+        #Logger.new('log/dev.log').info("TQ:custom:#{g2.to_s}")
 
       when "order"
         q[:order] = g2.downcase

@@ -179,6 +179,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       must.push({term: {has_disapprovals: q[:has_disapproval]}})
     end
 
+    
+
     add_tag_string_search_relation(q[:tags])
 
     case q[:order]
@@ -332,6 +334,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     #  score_ratio_i: [420*U/((D+U+1)*69)]
     #  score_exper:   score_ratio_i+new_fs
     #  new_fs:        [(69*U+F+C+I)/(D+(F/2)+U+T)]
+    
     when "score_ratio_i"
       @function_score = {
         script_score: {
@@ -365,6 +368,31 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
         },
       }
       order.push({ _score: :desc })  
+    when "custom"
+      search_terms = {
+      'U' => "doc['up_score'].value", 
+      'D' => "-1 * doc['down_score'].value",
+      #'d' => "doc['down_score'].value",
+      'C' => "doc['comment_count'].value", 
+      'F' => "doc['fav_count'].value",
+      'T' => "#{Post.count}",
+      'I' => "doc['id'].value",
+      'P' => "doc['pools'].length", #i mean it kind of works, but not really...
+      #'L' => "doc['duration'].value" # throws error if any posts dont have duration
+      }
+      
+      if q[:custom_order].present?
+        custom_order = q[:custom_order]
+      else   
+        custom_order = "(420*U)/((d+U+1)*69)+((69*U+F+C+I)/(d+U+T+1+F/2))"   
+      end
+      func = custom_order.gsub(Regexp.union(search_terms.keys),search_terms) 
+      Logger.new('log/dev.log').info("CUSTOM::#{func}")
+      @function_score = {script_score: {script: {
+          source: "#{func}",
+      },},}
+      order.push({ _score: :desc })
+
     when "random"
       if q[:random_seed].present?
         @function_score = {
@@ -383,8 +411,5 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     else
       order.push({id: :desc})
     end
-
-
-
   end
 end
