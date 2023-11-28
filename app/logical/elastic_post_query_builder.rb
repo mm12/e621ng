@@ -330,19 +330,37 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
         },
       }
       order.push({ _score: :desc })
+    when "score_ratio_i"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "69*doc['up_score'].value / ((-1 * doc['down_score'].value + doc['up_score'].value +1)*420)",
+          },
+        },
+      }
+      order.push({ _score: :desc })
 
 
-    #when "score_favs"
-    #  @function_score = {
-    #    script_score: {
-    #      script: {
-    #        source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))*420",
-    #      },
-    #    },
-    #  }
-    #  order.push({ _score: :desc })
+    when "score_favs" # BAD 
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))*420",
+          },
+        },
+      }
+      order.push({ _score: :desc })
+    when "score_favs_i" # BAD 
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value) / ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))*420)",
+          },
+        },
+      }
+      order.push({ _score: :desc })
 
-    when "score_favs_B"
+    when "score_favs_b"
       @function_score = {
         script_score: {
           script: {
@@ -351,7 +369,26 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
         },
       }
       order.push({ _score: :desc })
-
+    when "score_favs_bi"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(21*doc['fav_count'].value+69*doc['up_score'].value+doc['comment_count'].value) / ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)*420))",
+          },
+        },
+      }
+      order.push({ _score: :desc })
+    
+    when "score_exper"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(((doc['up_score'].value*69)/(1 - doc['down_score'].value + doc['up_score'].value) + (2*(2*doc['comment_count'].value + doc['fav_count'].value + doc['fav_count'].value*21 + 2*doc['up_score'].value*69))/(2 - 2*doc['down_score'].value + doc['fav_count'].value + 2*doc['up_score'].value)) * 420)",
+          },
+        },
+      }
+      order.push({ _score: :desc })
+      
     when "new_fs"
       @function_score = {
         script_score: {
@@ -361,15 +398,33 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
         },
       }
       order.push({ _score: :desc })  
-    #when "new_fs_B"
-    #  @function_score = {
-    #    script_score: {
-    #      script: {
-    #        source: "(69*doc['up_score'].value+21*doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)+(#{Post.count}))*420",
-    #      },
-    #    },
-    #  }
-    #  order.push({ _score: :desc }) 
+    when "new_fs_b" # BAD
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(69*doc['up_score'].value+21*doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)+(#{Post.count}))*420",
+          },
+        },
+      }
+      order.push({ _score: :desc }) 
+    when "new_fs_i"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)+(#{Post.count}))*420)",
+          },
+        },
+      }
+      order.push({ _score: :desc })  
+    when "new_fs_bi" # BAD
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(69*doc['up_score'].value+21*doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)+(#{Post.count}))*420)",
+          },
+        },
+      }
+      order.push({ _score: :desc }) 
     when "random"
       if q[:random_seed].present?
         @function_score = {
