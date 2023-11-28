@@ -321,11 +321,31 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       must.push({ range: { created_at: { gte: (Post.last.created_at-2.days) } } })
       order.push({ _score: :desc })
 
+    # WEIGHTS
+    #down_weight D = "-1 * doc['down_score'].value"
+    #up_weight   U = "doc['up_score'].value"
+    #com_weight  C = "doc['comment_count'].value"
+    #fav_weight  F = "doc['fav_count'].value"
+    #id_weight   I = "doc['id'].value"
+    #total_cnt   T = Post.count
+    #-----
+    #  score_ratio:   [69*U/(D+U+1)] 
+    #x score_ratio_i: [69*U/((D+U+1)*420)]
+    #x score_favs:    [(69*U+F+C)/(D+U+(F/2)+1)]
+    #x score_favs_i:  [(69*U+F+C)/((D+U+(F/2)+1)*420)]
+    #  score_favs_b:  [(21*F+69+U+C)/(D+U+(F/2)+1)]
+    #x score_favs_bi: [(21*F+69+U+C)/((D+U+(F/2)+1)*420)]
+    #  score_exper:   score_ratio+score_favs_b+new_fs
+    #  new_fs:        [(69*U+F+C+I)/(D+(F/2)+U+T)]
+    #x new_fs_b:      [(69*U+21*F+C+I)/(D+(F/2)+U+T)]
+    #x new_fs_i:      [(69*U+F+C+I)/((D+(F/2)+U+T)*420)]
+    #x new_fs_bi:     [(69*U+21*F+C+I)/((D+(F/2)+U+T)*420)]
     when "score_ratio"
       @function_score = {
         script_score: {
           script: {
-            source: "69*doc['up_score'].value / (-1 * doc['down_score'].value + doc['up_score'].value +1)*420",
+            source: "69*doc['up_score'].value / 
+            (-1 * doc['down_score'].value + doc['up_score'].value +1)",
           },
         },
       }
@@ -334,7 +354,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "69*doc['up_score'].value / ((-1 * doc['down_score'].value + doc['up_score'].value +1)*420)",
+            source: "69*doc['up_score'].value / 
+            ( (-1 * doc['down_score'].value + doc['up_score'].value +1) *420)",
           },
         },
       }
@@ -345,7 +366,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))*420",
+            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value) / 
+            (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))",
           },
         },
       }
@@ -354,7 +376,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value) / ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))*420)",
+            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value) / 
+            ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)) *420)",
           },
         },
       }
@@ -364,7 +387,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(21*doc['fav_count'].value+69*doc['up_score'].value+doc['comment_count'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))*420",
+            source: "(21*doc['fav_count'].value+69*doc['up_score'].value+doc['comment_count'].value) / 
+            (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))",
           },
         },
       }
@@ -373,7 +397,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(21*doc['fav_count'].value+69*doc['up_score'].value+doc['comment_count'].value) / ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)*420))",
+            source: "(21*doc['fav_count'].value+69*doc['up_score'].value+doc['comment_count'].value) / 
+            ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2) *420))",
           },
         },
       }
@@ -383,7 +408,12 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(((doc['up_score'].value*69)/(1 - doc['down_score'].value + doc['up_score'].value) + (2*(2*doc['comment_count'].value + doc['fav_count'].value + doc['fav_count'].value*21 + 2*doc['up_score'].value*69))/(2 - 2*doc['down_score'].value + doc['fav_count'].value + 2*doc['up_score'].value)) * 420)",
+            source: "(69*doc['up_score'].value / 
+             (-1 * doc['down_score'].value + doc['up_score'].value +1))+
+            ((21*doc['fav_count'].value+69*doc['up_score'].value+doc['comment_count'].value) / 
+             (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)))+
+            ((69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / 
+             (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2) + (#{Post.count}) ))",
           },
         },
       }
@@ -393,7 +423,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)+(#{Post.count}))*420",
+            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / 
+            (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2) + (#{Post.count}) )",
           },
         },
       }
@@ -402,7 +433,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(69*doc['up_score'].value+21*doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)+(#{Post.count}))*420",
+            source: "(69*doc['up_score'].value+21*doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / 
+            (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2) + (#{Post.count}) ) ",
           },
         },
       }
@@ -411,7 +443,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)+(#{Post.count}))*420)",
+            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / 
+            ( (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2) + (#{Post.count}) )*420)",
           },
         },
       }
@@ -420,7 +453,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(69*doc['up_score'].value+21*doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)+(#{Post.count}))*420)",
+            source: "(69*doc['up_score'].value+21*doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / 
+            ((-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)+(#{Post.count}))*420)",
           },
         },
       }
@@ -443,5 +477,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     else
       order.push({id: :desc})
     end
+
+
+
   end
 end
