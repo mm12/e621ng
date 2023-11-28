@@ -329,22 +329,10 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     #id_weight   I = "doc['id'].value"
     #total_cnt   T = Post.count
     #-----
-    #  score_ratio:   [69*U/(D+U+1)] 
-    #? score_ratio_i: [420*U/((D+U+1)*69)]
+    #  score_ratio_i: [420*U/((D+U+1)*69)]
     #  score_favs_b:  [(21*F+69*U+C)/(D+U+(F/2)+1)]
-    #  score_exper:   score_ratio+score_favs_b+new_fs
+    #  score_exper:   score_ratio_i+new_fs+score_favs_b
     #  new_fs:        [(69*U+F+C+I)/(D+(F/2)+U+T)]
-    #- new_fs_b:      [(69*U+21*F+C+I)/(D+(F/2)+U+T)]
-    when "score_ratio"
-      @function_score = {
-        script_score: {
-          script: {
-            source: "69*doc['up_score'].value / 
-            (-1 * doc['down_score'].value + doc['up_score'].value +1)",
-          },
-        },
-      }
-      order.push({ _score: :desc })
     when "score_ratio_i"
       @function_score = {
         script_score: {
@@ -381,12 +369,10 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       @function_score = {
         script_score: {
           script: {
-            source: "(69*doc['up_score'].value / 
-             (-1 * doc['down_score'].value + doc['up_score'].value +1))+
-            ((21*doc['fav_count'].value+69*doc['up_score'].value+doc['comment_count'].value) / 
-             (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2)))+
-            ((69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / 
-             (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2) + (#{Post.count}) ))",
+            source: "(420*doc['up_score'].value / 
+            ( (-1 * doc['down_score'].value + doc['up_score'].value +1) *69))+((69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / 
+            (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2) + (#{Post.count}) ))+(21*doc['fav_count'].value+69*doc['up_score'].value+doc['comment_count'].value) / 
+            (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2))",
           },
         },
       }
