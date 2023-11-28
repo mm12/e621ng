@@ -377,7 +377,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       'F' => "doc['fav_count'].value",
       'T' => "#{Post.count}",
       'I' => "doc['id'].value",
-      'P' => "doc['pools'].length", #i mean it kind of works, but not really...
+      #'P' => "doc['pools'].length", #i mean it kind of works, but not really...
       #'L' => "doc['duration'].value" # throws error if any posts dont have duration
       }
       
