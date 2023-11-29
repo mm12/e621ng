@@ -283,6 +283,10 @@ class TagQuery
 
       when "order"
         q[:order] = g2.downcase
+        q[:order_reversed] = false
+      when "-order"
+        q[:order] = g2.downcase
+        q[:order_reversed] = true
 
       when "limit"
         # Do nothing. The controller takes care of it.

@@ -321,7 +321,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       }
       must.push({ range: { score: { gt: 0 } } })
       must.push({ range: { created_at: { gte: (Post.last.created_at-2.days) } } })
-      order.push({ _score: :desc })
+      direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
+      order.push(direction)
 
     # WEIGHTS
     #down_weight D = "-1 * doc['down_score'].value"
@@ -344,7 +345,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
           },
         },
       }
-      order.push({ _score: :desc })
+      direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
+      order.push(direction)
 
     when "score_exper"
       @function_score = {
@@ -356,7 +358,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
           },
         },
       }
-      order.push({ _score: :desc })
+      direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
+      order.push(direction)
 
     when "new_fs"
       @function_score = {
@@ -367,7 +370,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
           },
         },
       }
-      order.push({ _score: :desc })  
+      direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
+      order.push(direction)
     when "custom"
       search_terms = {
       'U' => "doc['up_score'].value", 
@@ -384,14 +388,15 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       if q[:custom_order].present?
         custom_order = q[:custom_order]
       else   
-        custom_order = "(420*U)/((d+U+1)*69)+((69*U+F+C+I)/(d+U+T+1+F/2))"   
+        custom_order = "(420*U)/((D+U+1)*69)+((69*U+F+C+I)/(D+U+T+1+F/2))"   
       end
       func = custom_order.gsub(Regexp.union(search_terms.keys),search_terms) 
       Logger.new('log/dev.log').info("CUSTOM::#{func}")
       @function_score = {script_score: {script: {
           source: "#{func}",
       },},}
-      order.push({ _score: :desc })
+      direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
+      order.push(direction)
 
     when "random"
       if q[:random_seed].present?
@@ -405,7 +410,6 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
           boost_mode: :replace,
         }
       end
-
       order.push({_score: :desc})
 
     else
