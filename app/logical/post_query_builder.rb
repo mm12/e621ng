@@ -114,13 +114,13 @@ class PostQueryBuilder
     q[:approver_ids_must_not]&.each do |approver_id|
       relation = relation.where.not("posts.approver_id": approver_id)
     end
-    q[:disapprover_ids]&.each do |disapprover_id|
-      relation = relation.where("posts.disapprover_id": disapprover_id)
+
+    if q[:disapprover] == "any"
+      relation = relation.where("posts.disapprovals is not null")
+    elsif q[:disapprover] == "none"
+      relation = relation.where("posts.disapprovals is null")
     end
 
-    q[:disapprover_ids_must_not]&.each do |disapprover_id|
-      relation = relation.where.not("posts.disapprover_id": disapprover_id)
-    end
     if q[:commenter] == "any"
       relation = relation.where("posts.last_commented_at is not null")
     elsif q[:commenter] == "none"

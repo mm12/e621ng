@@ -36,6 +36,8 @@ module PostIndex
           tag_count_lore: { type: "integer" },
           comment_count: { type: "integer" },
 
+          disapprover: { type: "integer" },
+
           file_size: { type: "integer" },
           parent: { type: "integer" },
           pools: { type: "integer" },
@@ -72,7 +74,7 @@ module PostIndex
           deleted: { type: "boolean" },
           has_children: { type: "boolean" },
           has_pending_replacements: { type: "boolean" },
-          has_disapprovals: { type: "boolean" },
+          
         },
       },
     }
@@ -115,6 +117,11 @@ module PostIndex
         commenter_sql = <<-SQL
           SELECT post_id, array_agg(distinct creator_id) FROM comments
           WHERE post_id IN (#{post_ids}) AND is_hidden = false
+          GROUP BY post_id
+        SQL
+        disapproval_sql = <<-SQL
+          SELECT post_id, array_agg(distinct user_id) FROM post_disapprovals
+          WHERE post_id IN (#{post_ids}) 
           GROUP BY post_id
         SQL
         noter_sql = <<-SQL
@@ -170,7 +177,8 @@ module PostIndex
         notes          = Hash.new { |h,k| h[k] = [] }
         conn.execute(note_sql).values.each { |p,b| notes[p] << b }
         pending_replacements = conn.execute(pending_replacements_sql).values.to_h
-        #disapprovals         = conn.execute(deletion_sql)
+        
+        #disapprovals         = conn.execute(disapproval_sql).values.map(&array_parse).to_h
         #disapprover_ids      = disapprovals.values.map {|p,did,dr| [p,did]}.to_h
         #disapproval_reasons  = disapprovals.values.map {|p,did,dr| [p,dr]}.to_h
 
@@ -200,7 +208,7 @@ module PostIndex
             deleter:       deleter_ids[p.id]    || empty,
             del_reason:    del_reasons[p.id]    || empty,
             has_pending_replacements: pending_replacements[p.id],
-            disapproved:         disapprove[p.id]
+            disapproves:   disapprovals[p.id]     || empty
           }
 
           {
@@ -255,7 +263,8 @@ module PostIndex
       downvotes:    options[:downvotes]  || ::PostVote.where(post_id: id).where("score < 0").pluck(:user_id),
       children:     options[:children]   || ::Post.where(parent_id: id).pluck(:id),
       notes:        options[:notes]      || ::Note.active.where(post_id: id).pluck(:body),
-      disapprove:   1 || ::PostDisapproval.where(post_id: id).pluck(:user_id),
+      #disapproves:  options[:disapproves]|| ::PostDisapproval.where(post_id: id).pluck(:user_id),
+      #disapprove:   1,# || ::PostDisapproval.where(post_id: id).pluck(:user_id),
       uploader:     uploader_id,
       approver:     approver_id,
       deleter:      options[:deleter]    || ::PostFlag.where(post_id: id, is_resolved: false, is_deletion: true).order(id: :desc).first&.creator_id,
