@@ -20,13 +20,7 @@ class PostsDecorator < ApplicationDecorator
     klass
   end
 
-=begin   
-def set_IDs(p) # super inefficent test
-    sets_with_p = PostSet.select do |a|
-      a.post_ids.include?(p)
-    end.map(&:id)
-  end 
-=end
+
 
   def data_attributes
     post = object
@@ -82,12 +76,11 @@ def set_IDs(p) # super inefficent test
     post_score_icon = "#{'↑' if post.score > 0}#{'↓' if post.score < 0}#{'↕' if post.score == 0}"
     score = t.tag.span("#{post_score_icon}#{post.score}", class: "post-score-score #{score_class(post.score)}")
     scoreE = t.tag.span("(+#{post.up_score}-#{post.down_score*-1})=\n", class: "post-score-diff")
-    ps = t.tag.span("p:#{post.pool_string.split.count} s:#{set_IDs(post.id).count}\n", class: "post-poolset-count")
     favs = t.tag.span("♥#{post.fav_count}", class: "post-score-faves")
     comments = t.tag.span "C#{post.visible_comment_count(CurrentUser)}", class: 'post-score-comments'
     rating =  t.tag.span(post.rating.upcase, class: "post-score-rating")
     status = t.tag.span(status_flags.join(''), class: 'post-score-extras')
-    t.tag.div ps+ scoreE + score + favs + comments + rating + status, class: 'post-score', id: "post-score-#{post.id}"
+    t.tag.div scoreE + score + favs + comments + rating + status, class: 'post-score', id: "post-score-#{post.id}"
   end
 
   def preview_html(t, options = {})

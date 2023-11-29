@@ -381,8 +381,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       'F' => "doc['fav_count'].value",
       'T' => "#{Post.count}",
       'I' => "doc['id'].value",
-      'P' => "doc['pools'].size()==0 ? 1/doc['id'].value : doc['pools'].size()",  # i dont want this, right>?
-      'S' => "doc['sets'].size()==0 ? 1/doc['id'].value : doc['sets'].size()", # i dont want this, right?
+      'P' => "doc['pools'].size()==0 ? 1/doc['id'].value : doc['pools'].size()",  #actually this does work
+      'S' => "doc['sets'].size()==0 ? 1/doc['id'].value : doc['sets'].size()", #actually this does work
       'L' => "doc['duration'].size()==0 ? 1/doc['id'].value : doc['duration'].value" 
       }
       
