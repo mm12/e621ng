@@ -373,6 +373,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
       order.push(direction)
     when "custom"
+      time_div = Time.now.to_f*1000
       search_terms = {
       'U' => "doc['up_score'].value", 
       'D' => "-1 * doc['down_score'].value",
@@ -384,14 +385,14 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       'P' => "doc['pools'].size()==0 ? 1/doc['id'].value : doc['pools'].size()",  #actually this does work
       'S' => "doc['sets'].size()==0 ? 1/doc['id'].value : doc['sets'].size()", #actually this does work
       'L' => "doc['duration'].size()==0 ? 1/doc['id'].value : doc['duration'].value",
-      'n' => "doc['noted_at'].size()==0 ? 1/doc['id'].value : doc['noted_at'].value.millis",
+      'n' => "doc['noted_at'].size()==0 ? 1/doc['id'].value : (#{Time.now.to_f*1000}-doc['noted_at'].value.millis)/#{time_div}}",
       'w' => "doc['width'].value",
       'h' => "doc['height'].value",
-      'u' => "doc['updated_at'].value.millis",
+      'u' => "(#{Time.now.to_f*1000}-doc['updated_at'].value.millis)/#{time_div}",
       'N' => "doc['noted_at'].size()==0 ? 1/doc['id'].value : doc['noted_at'].size()",
       'f' => "doc['file_size'].value",
       'r' => "doc['aspect_ratio'].value",
-      'c' => "doc['comment_bumped_at'].size()==0 ? 1/doc['id'].value : doc['comment_bumped_at'].value.millis",
+      'c' => "doc['comment_bumped_at'].size()==0 ? 1/doc['id'].value : (#{Time.now.to_f*1000}-doc['comment_bumped_at'].value.millis)/#{time_div}",
       'H' => "doc['children'].size()==0 ? 1/doc['id'].value : doc['children'].size()",
       'p' => "doc['mpixels'].value",
       'cs'=> "doc['change_seq'].value",
