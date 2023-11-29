@@ -226,7 +226,7 @@ module PostIndex
       end
     end
   end
-
+# pick fields from here
   def as_indexed_json(options = {})
     {
       created_at:        created_at,

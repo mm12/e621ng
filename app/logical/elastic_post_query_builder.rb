@@ -384,9 +384,26 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       'P' => "doc['pools'].size()==0 ? 1/doc['id'].value : doc['pools'].size()",  #actually this does work
       'S' => "doc['sets'].size()==0 ? 1/doc['id'].value : doc['sets'].size()", #actually this does work
       'L' => "doc['duration'].size()==0 ? 1/doc['id'].value : doc['duration'].value",
-      'n' => "doc['noted_at'].size()==0 ? 1/doc['id'].value : doc['noted_at'].value",
+      'n' => "doc['noted_at'].size()==0 ? 1/doc['id'].value : doc['noted_at'].value.millis",
       'w' => "doc['width'].value",
       'h' => "doc['height'].value",
+      'u' => "doc['updated_at'].value.millis",
+      'N' => "doc['noted_at'].size()==0 ? 1/doc['id'].value : doc['noted_at'].size()",
+      'f' => "doc['file_size'].value",
+      'r' => "doc['aspect_ratio'].value",
+      'c' => "doc['comment_bumped_at'].size()==0 ? 1/doc['id'].value : doc['comment_bumped_at'].value.millis",
+      'H' => "doc['children'].size()==0 ? 1/doc['id'].value : doc['children'].size()",
+      'p' => "doc['mpixels'].value",
+      'cs'=> "doc['change_seq'].value",
+      'tx'=> "doc['tag_count'].value",
+      'tg'=> "doc['tag_count_general'].value",
+      'tl'=> "doc['tag_count_lore'].value",
+      'ts'=> "doc['tag_count_species'].value",
+      'ta'=> "doc['tag_count_artist'].value",
+      'th'=> "doc['tag_count_character'].value",
+      'to'=> "doc['tag_count_copyright'].value",
+      'tm'=> "doc['tag_count_meta'].value",
+      'ti'=> "doc['tag_count_invalid'].value",
       }
       
       if q[:custom_order].present?
