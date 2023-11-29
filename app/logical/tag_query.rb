@@ -13,7 +13,7 @@ class TagQuery
     id filetype type rating description parent user user_id approver flagger deletedby delreason
     source status pool set fav favoritedby note locked upvote votedup downvote voteddown voted
     width height mpixels ratio filesize duration score favcount date age change tagcount
-    commenter comm noter noteupdater
+    commenter comm noter noteupdater disapproved
   ] + TagCategory::SHORT_NAME_LIST.map { |tag_name| "#{tag_name}tags" }
 
   METATAGS = %w[
@@ -138,6 +138,12 @@ class TagQuery
 
       when "approver", "-approver", "~approver"
         add_to_query(type, :approver_ids, any_none_key: :approver, value: g2) do
+          user_id = User.name_or_id_to_id(g2)
+          id_or_invalid(user_id)
+        end
+      
+      when "disapprover", "-disapprover", "~disapprover"
+        add_to_query(type, :disapprover_ids, any_none_key: :disapprover, value: g2) do
           user_id = User.name_or_id_to_id(g2)
           id_or_invalid(user_id)
         end
@@ -316,6 +322,7 @@ class TagQuery
           user_id = User.name_or_id_to_id(g2)
           id_or_invalid(user_id)
         end
+      
 
       when "upvote", "-upvote", "~upvote", "votedup", "-votedup", "~votedup"
         add_to_query(type, :upvote) do

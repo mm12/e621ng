@@ -200,7 +200,7 @@ module PostIndex
             deleter:       deleter_ids[p.id]    || empty,
             del_reason:    del_reasons[p.id]    || empty,
             has_pending_replacements: pending_replacements[p.id],
-            has_disapprovals:         disapprovals[p.id]
+            disapproved:         disapprove[p.id]
           }
 
           {
@@ -255,6 +255,7 @@ module PostIndex
       downvotes:    options[:downvotes]  || ::PostVote.where(post_id: id).where("score < 0").pluck(:user_id),
       children:     options[:children]   || ::Post.where(parent_id: id).pluck(:id),
       notes:        options[:notes]      || ::Note.active.where(post_id: id).pluck(:body),
+      disapprove:   1 || ::PostDisapproval.where(post_id: id).pluck(:user_id),
       uploader:     uploader_id,
       approver:     approver_id,
       deleter:      options[:deleter]    || ::PostFlag.where(post_id: id, is_resolved: false, is_deletion: true).order(id: :desc).first&.creator_id,
@@ -280,7 +281,7 @@ module PostIndex
       deleted:        is_deleted,
       has_children:   has_children,
       has_pending_replacements: options.key?(:has_pending_replacements) ? options[:has_pending_replacements] : replacements.pending.any?,
-      has_disapprovals: options.key?(:has_disapprovals)# ? options[:has_disapprovals] : disapprovals.pending.any?
+      #disapprovers: options.key?(:has_disapprovals) ? options[:has_disapprovals] : disapprovals.user_id.any?
 
     }
   end

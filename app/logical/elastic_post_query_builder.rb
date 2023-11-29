@@ -103,6 +103,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
 
     add_array_relation(:uploader_ids, :uploader)
     add_array_relation(:approver_ids, :approver, any_none_key: :approver)
+    add_array_relation(:disapprover_ids, 0, any_none_key: 0)
     add_array_relation(:commenter_ids, :commenters, any_none_key: :commenter)
     add_array_relation(:noter_ids, :noters, any_none_key: :noter)
     add_array_relation(:note_updater_ids, :noters) # Broken, index field missing
@@ -383,7 +384,10 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       'I' => "doc['id'].value",
       'P' => "doc['pools'].size()==0 ? 1/doc['id'].value : doc['pools'].size()",  #actually this does work
       'S' => "doc['sets'].size()==0 ? 1/doc['id'].value : doc['sets'].size()", #actually this does work
-      'L' => "doc['duration'].size()==0 ? 1/doc['id'].value : doc['duration'].value" 
+      'L' => "doc['duration'].size()==0 ? 1/doc['id'].value : doc['duration'].value",
+      'n' => "doc['noted_at'].size()==0 ? 1/doc['id'].value : doc['noted_at'].value",
+      'w' => "doc['width'].value",
+      'h' => "doc['height'].value",
       }
       
       if q[:custom_order].present?
