@@ -381,9 +381,9 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       'F' => "doc['fav_count'].value",
       'T' => "#{Post.count}",
       'I' => "doc['id'].value",
-      'P' => "doc['pools'].size()==0 ? 0 : doc['pools'].size()", # is pools even the right item?
-      'S' => "doc['sets'].size()==0 ? 0 : doc['sets'].size()", #i mean it kind of works, but not really...
-      'L' => "doc['duration'].size()==0 ? 0 : doc['duration'].value" 
+      'P' => "doc['pools'].size()==0 ? 1/doc['id'].value : doc['pools'].size()",  # i dont want this, right>?
+      'S' => "doc['sets'].size()==0 ? 1/doc['id'].value : doc['sets'].size()", # i dont want this, right?
+      'L' => "doc['duration'].size()==0 ? 1/doc['id'].value : doc['duration'].value" 
       }
       
       if q[:custom_order].present?

@@ -24,6 +24,7 @@ class PostsDecorator < ApplicationDecorator
     post = object
     attributes = {
         "data-id" => post.id,
+        "data-pool-count" => post.pool_string.split.count,
         "data-has-sound" => post.has_tag?("video_with_sound", "flash_with_sound"),
         "data-tags" => post.tag_string,
         "data-rating" => post.rating,
@@ -73,11 +74,12 @@ class PostsDecorator < ApplicationDecorator
     score = t.tag.span("#{post_score_icon}#{post.score}", class: "post-score-score #{score_class(post.score)}")
     scoreu = t.tag.span("#{post.up_score}", class: "post-score-score")
     scored = t.tag.span("#{post.down_score}", class: "post-score-score")
+    poolc = t.tag.span("#{post.pool_string.split.count}", class: "post-pool-count")
     favs = t.tag.span("♥#{post.fav_count}", class: "post-score-faves")
     comments = t.tag.span "C#{post.visible_comment_count(CurrentUser)}", class: 'post-score-comments'
     rating =  t.tag.span(post.rating.upcase, class: "post-score-rating")
     status = t.tag.span(status_flags.join(''), class: 'post-score-extras')
-    t.tag.div scoreu + scored + score + favs + comments + rating + status, class: 'post-score', id: "post-score-#{post.id}"
+    t.tag.div scoreu + scored + poolc + score + favs + comments + rating + status, class: 'post-score', id: "post-score-#{post.id}"
   end
 
   def preview_html(t, options = {})
@@ -112,7 +114,7 @@ class PostsDecorator < ApplicationDecorator
       link_params["post_set_id"] = options[:post_set_id]
     end
 
-    tooltip = "Rating: #{post.rating}\nID: #{post.id}\nDate: #{post.created_at}\nStatus: #{post.status}\nScore: #{post.score}"
+    tooltip = "Rating: #{post.rating}\nID: #{post.id}\nPools: #{post.pool_string.split.count}\nDate: #{post.created_at}\nStatus: #{post.status}\nScore: #{post.score}"
     if CurrentUser.is_janitor?
       tooltip += "\nUploader: #{post.uploader_name}"
       if post.is_flagged? || post.is_deleted?
