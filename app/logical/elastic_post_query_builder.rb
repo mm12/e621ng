@@ -381,7 +381,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       'F' => "doc['fav_count'].value",
       'T' => "#{Post.count}",
       'I' => "doc['id'].value",
-      #'P' => "doc['pools'].length", #i mean it kind of works, but not really...
+      #'P' => "doc['pools'].value", #i mean it kind of works, but not really...
+      #'S' => "doc['sets'].value", #i mean it kind of works, but not really...
       #'L' => "doc['duration'].value" # throws error if any posts dont have duration
       }
       
@@ -415,5 +416,18 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     else
       order.push({id: :desc})
     end
+  end
+end
+
+
+def fix_pools
+  (1..Pool.last.id).each do |n|
+    Pool.find(n).post_ids.each do |k|
+      p = Post.find(k)
+      p.update(pool_string: "#{p['pool_string']} pool:#{n}")
+      p.save!
+    end
+    rescue ActiveRecord::RecordNotFound => e 
+      next
   end
 end
