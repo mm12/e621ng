@@ -392,6 +392,10 @@ class User < ApplicationRecord
       blta = blacklisted_tags.split("\n").map{|x| x.downcase}
       blta.include?("user:#{user.name.downcase}") || blta.include?("uploaderid:#{user.id}")
     end
+
+    def add_blacklist_line(line)
+      self.blacklisted_tags = "#{blacklisted_tags}\n#{line}"
+    end
   end
 
   module ForumMethods
@@ -407,6 +411,8 @@ class User < ApplicationRecord
       @topic_views ||= forum_topic_visits.pluck(:forum_topic_id, :last_read_at).to_h
       @topic_views.key?(id) && @topic_views[id] >= last_updated
     end
+
+    
   end
 
   module ThrottleMethods
@@ -647,7 +653,7 @@ class User < ApplicationRecord
           :custom_style, :favorite_count,
           :api_regen_multiplier, :api_burst_limit, :remaining_api_limit,
           :statement_timeout, :favorite_limit,
-          :tag_query_limit
+          :tag_query_limit#, :add_blacklist_line
         ]
       end
 
