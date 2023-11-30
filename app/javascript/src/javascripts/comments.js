@@ -11,7 +11,7 @@ Comment.initialize_all = function () {
     $(".comment-vote-down-link").on("click", Comment.vote_down);
     $(".comment-reply-link").on('click', Comment.quote);
     $(".comment-hide-link").on('click', Comment.hide);
-    $(".comment-block-link").on('click', Comment.hide);
+    $(".comment-block-user-link").on('click', Comment.block);
     $(".comment-unhide-link").on('click', Comment.unhide);
     $(".comment-delete-link").on('click', Comment.delete);
     $(".show-all-comments-for-post-link").on('click', Comment.show_all);
@@ -24,7 +24,7 @@ Comment.reinitialize_all = function () {
     $(".comment-reply-link").off('click');
     $(".comment-hide-link").off('click');
     $(".comment-unhide-link").off('click');
-    $(".comment-block-link").off('click');
+    $(".comment-block-user-link").off('click');
     $(".comment-delete-link").off('click');
     $(".show-all-comments-for-post-link").off('click');
     $(".comment-tag-hide-link").off("click");
@@ -96,13 +96,26 @@ Comment.unhide = function (e) {
 
 Comment.block = function(e) {
   e.preventDefault();
-  if (!confirm("Are you sure you want to blacklist this user? Their posts will be blacklisted as well.")) return;
+  if (!confirm("Are you sure you want to blacklist this user? Their posts will be blacklisted as well. Additionally, all blacklisted users will also have both their posts and non-posts blocked.")) return;
   const parent = $(e.target).parents('article.comment');
-  const uid = parent.data('creator-id');
+  const buid = parent.data('creator-id');
+  //const blockstr = `\nuser:${buid}`
   $.ajax({
-    url:``
-  })
-
+    url:`/users/${Utility.meta("current-user-id")}.json`, 
+    type: 'PATCH',
+    data:{
+      'user[blacklist_users]':true,
+      'user[blacklisted_tags]':`\nuser:${buid}`
+    },
+    headers: {
+      accept: '*/*;q=0.5,text/javascript',
+      Cookie: document.cookie,
+    }
+  }).done(function(data) {
+    $(window).trigger("danbooru:notice", "User blocked");
+  }).fail(function (data) {
+    Utility.error("Failed to block user.");
+  });
 };
 
 Comment.delete = function (e) {

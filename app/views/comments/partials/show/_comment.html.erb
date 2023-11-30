@@ -43,8 +43,8 @@
               <li><%= tag.a "Unhide", href: '#', class: 'comment-unhide-link' %></li>
             <% end %>
 
-            <% if !comment.is_hidden? && comment.creator_id==CurrentUser.user.id%>
-              <li><%= tag.a "Block", href: '#', class: 'item-block-user-link' %></li>
+            <% if !comment.is_hidden? && comment.creator_id!=CurrentUser.user.id%>
+              <li><%= tag.a "Block", href: '#', class: 'comment-block-user-link' %></li>
             <% end %>
 
             <% if CurrentUser.is_admin? %>
