@@ -270,7 +270,6 @@ Rails.application.routes.draw do
       post :view
     end
     resources :staff_notes, only: [:index, :new, :create], controller: "admin/staff_notes"
-# TODO: Add block user route
     collection do
       get :home
       get :search
@@ -416,7 +415,7 @@ Rails.application.routes.draw do
 
   get "/user" => redirect {|params, req| "/users?page=#{req.params[:page]}"}
   get "/user/index" => redirect {|params, req| "/users?page=#{req.params[:page]}"}
-  get "/user/show/:id" => redirect("/users/%{id}")
+  get "/user/show/:id" => redirect("/users/%{id}") #TODO 
   get "/user/login" => redirect("/session/new")
   get "/user_record" => redirect {|params, req| "/user_feedbacks?search[user_id]=#{req.params[:user_id]}"}
 

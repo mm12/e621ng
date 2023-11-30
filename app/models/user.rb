@@ -638,7 +638,7 @@ class User < ApplicationRecord
         :is_banned, :can_approve_posts, :can_upload_free,
         :level_string, :avatar_id
       ]
-
+# user block add
       if id == CurrentUser.user.id
         list += BOOLEAN_ATTRIBUTES + [
           :updated_at, :email, :last_logged_in_at, :last_forum_read_at,

@@ -172,7 +172,7 @@ ForumPost.block = function(e) {
   //const blockstr = `\nuser:${buid}`
   $.ajax({
     url:`/users/${Utility.meta("current-user-id")}.json`, 
-    type: 'PATCH',
+    method: 'PATCH',
     data:{
       'user[blacklist_users]':true,
       'user[blacklisted_tags]':`\nuser:${buid}`

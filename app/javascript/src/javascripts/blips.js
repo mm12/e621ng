@@ -50,7 +50,7 @@ Blip.block = function(e) {
   const buid = parent.data('creator-id');
   $.ajax({
     url:`/users/${Utility.meta("current-user-id")}.json`, 
-    type: 'PATCH',
+    method: 'PATCH',
     data:{
       'user[blacklist_users]':true,
       'user[blacklisted_tags]':`\nuser:${buid}`
