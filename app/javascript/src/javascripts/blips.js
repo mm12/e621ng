@@ -46,7 +46,7 @@ ${stripped_body}
 Blip.block = function(e) {
   e.preventDefault();
   if (!confirm("Are you sure you want to blacklist this user? Their posts will be blacklisted as well. Additionally, all blacklisted users will also have both their posts and non-posts blocked.")) return;
-  const parent = $(e.target).parents('article.comment');
+  const parent = $(e.target).parents('article.blip');
   const buid = parent.data('creator-id');
   $.ajax({
     url:`/users/${Utility.meta("current-user-id")}.json`, 
@@ -76,6 +76,7 @@ Blip.initialize_all = function() {
       Blip.quote($(e.target).data('bid'));
       e.preventDefault();
     });
+    $(".blip-block-user-link").on('click', Blip.block);
   }
 }
 
@@ -83,6 +84,7 @@ Blip.reinitialize_all = function() {
   if($("#c-blips").length) {
     $(".blip-atme-link").off('click');
     $(".blip-reply-link").off('click');
+    $(".blip-block-user-link").off('click');
     Blip.initialize_all();
   }
 }

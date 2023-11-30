@@ -46,7 +46,7 @@
           <% end %>
 
           <% if blip.creator_id!=CurrentUser.user.id%>
-              <li><%= tag.a "Block", href: '#', class: 'comment-block-user-link' %></li>
+              <li><%= tag.a "Block", href: '#', class: 'blip-block-user-link' %></li>
           <% end %>
 
           <% if CurrentUser.is_admin? %>

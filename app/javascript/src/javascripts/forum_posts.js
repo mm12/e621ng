@@ -21,6 +21,7 @@ ForumPost.initialize_all = function() {
     $(".forum-post-reply-link").on('click', ForumPost.quote);
     $(".forum-post-hide-link").on('click', ForumPost.hide);
     $(".forum-post-unhide-link").on('click', ForumPost.unhide);
+    $(".forum-post-block-user-link").on('click', ForumPost.block);
     $(".forum-vote-up").on('click', evt => ForumPost.vote(evt, 1));
     $(".forum-vote-meh").on('click', evt => ForumPost.vote(evt, 0));
     $(".forum-vote-down").on('click', evt => ForumPost.vote(evt, -1));
@@ -35,6 +36,7 @@ ForumPost.reinitialize_all = function() {
     $(".forum-post-reply-link").off('click');
     $(".forum-post-hide-link").off('click');
     $(".forum-post-unhide-link").off('click');
+    $(".forum-post-block-user-link").off('click');
     $(".forum-vote-up").off('click');
     $(".forum-vote-meh").off('click');
     $(".forum-vote-down").off('click');
@@ -165,7 +167,7 @@ ForumPost.unhide = function (e) {
 ForumPost.block = function(e) {
   e.preventDefault();
   if (!confirm("Are you sure you want to blacklist this user? Their posts will be blacklisted as well. Additionally, all blacklisted users will also have both their posts and non-posts blocked.")) return;
-  const parent = $(e.target).parents('article.comment');
+  const parent = $(e.target).parents('article.forum-post');
   const buid = parent.data('creator-id');
   //const blockstr = `\nuser:${buid}`
   $.ajax({

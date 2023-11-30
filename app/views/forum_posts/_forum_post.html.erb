@@ -49,6 +49,9 @@
             <% elsif forum_post.topic.can_hide?(CurrentUser.user) %>
               <li><%= link_to "Hide", hide_forum_topic_path(forum_post.topic.id), :data => {:confirm => "Are you sure you want to hide this forum topic?"}, method: :post %></li>
             <% end %>
+            <% if forum_post.creator_id!=CurrentUser.user.id%>
+              <li><%= tag.a "Block", href: '#', class: 'forum-post-block-user-link' %></li>
+            <% end %>
             <% if forum_post.topic.can_delete?(CurrentUser.user) %>
               <li><%= link_to "Delete", forum_topic_path(forum_post.topic), :data => {:confirm => "Are you sure you want to delete this forum topic?"}, method: :delete %></li>
             <% end %>
