@@ -15,8 +15,7 @@
       <%= subnav_link_to "Messages #{CurrentUser.user.dmail_count}", dmails_current_folder_path %>
     <% else %>
       <%= subnav_link_to "Send message", new_dmail_path(dmail: { to_id: @user.id }) %>
-      <!--I know i cant do this but i mean.. -->
-      <%= subnav_link_to "Block", CurrentUser.user.blacklisted_tags="#{CurrentUser.user.blacklisted_tags}\nuser:#{@user.id}"%>
+      <%= subnav_link_to "Block", block_user_path(user: {to_id: @user.id})%>       <!--I know i cant do this but i mean.. block_user_path-->
       <%= subnav_link_to "Report/Commend", new_ticket_path(disp_id: @user.id, qtype: "user") %>
     <% end %>
 
