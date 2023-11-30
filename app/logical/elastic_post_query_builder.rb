@@ -376,7 +376,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       time_div = Time.now.to_f*1000
       search_terms = {
       'U' => "doc['up_score'].value", 
-      'D' => "-1 * doc['down_score'].value",
+      'D' => "doc['down_score'].value*-1",
       #'d' => "doc['down_score'].value",
       'C' => "doc['comment_count'].value", 
       'F' => "doc['fav_count'].value",
