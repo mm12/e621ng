@@ -270,7 +270,7 @@ Rails.application.routes.draw do
       post :view
     end
     resources :staff_notes, only: [:index, :new, :create], controller: "admin/staff_notes"
-
+# TODO: Add block user route
     collection do
       get :home
       get :search

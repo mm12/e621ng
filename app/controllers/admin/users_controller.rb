@@ -71,6 +71,11 @@ module Admin
       redirect_to edit_blacklist_admin_user_path(@user), notice: "Blacklist updated"
     end
 
+    def block 
+      @user = User.find(params[:id])
+      #return #redirect_to block_user_path(@user), notice: "TEST"
+    end
+
     def request_password_reset
       @user = User.find(params[:id])
     end
