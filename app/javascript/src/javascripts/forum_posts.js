@@ -161,6 +161,30 @@ ForumPost.unhide = function (e) {
     Utility.error("Failed to unhide post.");
   });
 };
+// TODO
+ForumPost.block = function(e) {
+  e.preventDefault();
+  if (!confirm("Are you sure you want to blacklist this user? Their posts will be blacklisted as well. Additionally, all blacklisted users will also have both their posts and non-posts blocked.")) return;
+  const parent = $(e.target).parents('article.comment');
+  const buid = parent.data('creator-id');
+  //const blockstr = `\nuser:${buid}`
+  $.ajax({
+    url:`/users/${Utility.meta("current-user-id")}.json`, 
+    type: 'PATCH',
+    data:{
+      'user[blacklist_users]':true,
+      'user[blacklisted_tags]':`\nuser:${buid}`
+    },
+    headers: {
+      accept: '*/*;q=0.5,text/javascript',
+      Cookie: document.cookie,
+    }
+  }).done(function(data) {
+    $(window).trigger("danbooru:notice", "User blocked");
+  }).fail(function (data) {
+    Utility.error("Failed to block user.");
+  });
+};
 
 $(document).ready(function() {
   ForumPost.initialize_all();

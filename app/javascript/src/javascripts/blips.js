@@ -42,7 +42,7 @@ ${stripped_body}
     Utility.error(data.responseText);
   });
 };
-
+// TODO
 Blip.block = function(e) {
   e.preventDefault();
   if (!confirm("Are you sure you want to blacklist this user? Their posts will be blacklisted as well. Additionally, all blacklisted users will also have both their posts and non-posts blocked.")) return;
