@@ -105,7 +105,7 @@ Comment.block = function(e) {
     method: 'PATCH',
     data:{
       'user[blacklist_users]':true,
-      'user[blacklisted_tags]':`\nuser:${buid}`
+      'user[blacklisted_tags]':`user:${buid}`
     },
     headers: {
       accept: '*/*;q=0.5,text/javascript',

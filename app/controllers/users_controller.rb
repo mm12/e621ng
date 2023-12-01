@@ -101,6 +101,21 @@ class UsersController < ApplicationController
     end
   end
 
+  def add_to_blacklist
+    @user = User.find(CurrentUser.id)
+    #@user.validate_email_format = true
+    check_privilege(@user)
+    @user.add_blacklist_line(params[:line])
+    if @user.errors.any?
+      flash[:notice] = @user.errors.full_messages.join("; ")
+    else
+      flash[:notice] = "Blacklist updated"
+    end
+    respond_with(@user) do |format|
+      format.html { redirect_back fallback_location: edit_user_path(@user) }
+    end
+  end
+
   def custom_style
     @css = CustomCss.parse(CurrentUser.user.custom_style)
     expires_in 10.years

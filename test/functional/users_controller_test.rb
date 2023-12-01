@@ -154,6 +154,13 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
         assert_equal("xyz", @user.favorite_tags)
       end
 
+      should "add a line to a user's blacklist" do
+        @user.update(blacklisted_tags:"abc")
+        put_auth user_path(@user), @user, params: {:user => {:add_to_blacklist => "xyz"}}
+        @user.reload
+        assert_equal("abc\nxyz", @user.blacklisted_tags)
+      end
+
       context "changing the level" do
         setup do
           @cuser = create(:user)
