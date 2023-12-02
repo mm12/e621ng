@@ -310,6 +310,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       must.push({ range: { created_at: { gte: 2.days.ago } } })
       order.push({ _score: :desc })
 
+
     when "dynrank"
       @function_score = {
         script_score: {
