@@ -355,7 +355,7 @@ class Post < ApplicationRecord
 
       alternate_processors = []
       sources.map! do |src|
-        src.unidocker exec -it e621ng-e621-1 rails ccode_normalize!(:nfc)
+        src.unicode_normalize!(:nfc)
         src = src.try(:strip)
         alternate = Sources::Alternates.find(src)
         alternate_processors << alternate
