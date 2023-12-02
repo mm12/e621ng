@@ -87,6 +87,7 @@ Autocomplete.initialize_tag_autocomplete = function() {
         resp([]);
         return;
       case "order":
+      case "custom":
       case "status":
       case "rating":
       case "locked":
@@ -94,9 +95,7 @@ Autocomplete.initialize_tag_autocomplete = function() {
       case "parent":
       case "filetype":
       case "type":
-      case "disapproval":
-        Autocomplete.static_metatag_source(term, resp, metatag);
-        return;
+      case "disapprover":
       case "user":
       case "approver":
       case "commenter":

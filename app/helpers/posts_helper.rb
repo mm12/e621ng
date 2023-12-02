@@ -93,10 +93,11 @@ module PostsHelper
     post_score_icon = "#{'↑' if post.score > 0}#{'↓' if post.score < 0}#{'↕' if post.score == 0}"
     score = tag.span("#{post_score_icon}#{post.score}", class: "post-score-score #{score_class(post.score)}")
     favs = tag.span("♥#{post.fav_count}", class: "post-score-faves")
+    poolc = tag.span("#{post.pool_string.split.count}", class: "post-pools")
     comments = tag.span "C#{post.visible_comment_count(CurrentUser)}", class: 'post-score-comments'
     rating =  tag.span(post.rating.upcase, class: "post-score-rating")
     status = tag.span(status_flags.join(''), class: 'post-score-extras')
-    tag.div score + favs + comments + rating + status, class: 'post-score', id: "post-score-#{post.id}"
+    tag.div score + poolc+favs + comments + rating + status, class: 'post-score', id: "post-score-#{post.id}"
   end
 
   def user_record_meta(user)

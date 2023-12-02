@@ -115,6 +115,12 @@ class PostQueryBuilder
       relation = relation.where.not("posts.approver_id": approver_id)
     end
 
+    if q[:disapprover] == "any"
+      relation = relation.where("posts.disapprovals is not null")
+    elsif q[:disapprover] == "none"
+      relation = relation.where("posts.disapprovals is null")
+    end
+
     if q[:commenter] == "any"
       relation = relation.where("posts.last_commented_at is not null")
     elsif q[:commenter] == "none"
