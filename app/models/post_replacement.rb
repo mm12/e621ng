@@ -159,7 +159,7 @@ class PostReplacement < ApplicationRecord
     end
 
     def replacement_thumb_url
-      Danbooru.config.storage_manager.replacement_url(self, :preview)
+      Danbooru.config.storage_manager.replacement_url(self, :preview).sub! "http://localhost:3000",""
     end
   end
 
