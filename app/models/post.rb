@@ -366,7 +366,7 @@ class Post < ApplicationRecord
         alternate.original_url
       end
       sources = (sources + submission_sources + gallery_sources + direct_sources + additional_sources).compact.reject{ |e| e.strip.empty? }.uniq
-      alternate_processors.eacdocker exec -it e621ng-e621-1 rails ch do |alt_processor|
+      alternate_processors.each do |alt_processor|
         sources = alt_processor.remove_duplicates(sources)
       end
 
