@@ -29,11 +29,6 @@
               <dt>Sequence</dt>
               <dd>
                 <%sequence = @post_replacements.where(post_id: post_replacement.post.id).ids.sort.index(post_replacement.id)%>
-                <%if(sequence == 0)%>
-                  <%sequence = 1%>
-                <%elsif(sequence == 1)%>
-                  <%sequence = 0%>
-                <%end%>
                 <%=post_replacement.post_id%>:<%=sequence%>
               </dd>
               <dt>Status</dt>
