@@ -28,4 +28,4 @@ test/reports
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
-db/posts-2023-11-21.csv
+db/*.csv

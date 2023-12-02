@@ -37,7 +37,7 @@ class TagRelationshipRequest
       antecedent_name: antecedent_name,
       consequent_name: consequent_name
     )
-    x.status = "pending"
+    #x.status = "pending"
     x
   end
 
@@ -54,9 +54,9 @@ class TagRelationshipRequest
   def validate_tag_relationship
     tag_relationship = @tag_relationship || build_tag_relationship
 
-    if tag_relationship.invalid?
-      errors.add(:base, tag_relationship.errors.full_messages.join("; "))
-    end
+    #if tag_relationship.invalid?
+    #  errors.add(:base, tag_relationship.errors.full_messages.join("; "))
+    #end
   end
 
   def validate_forum_topic
