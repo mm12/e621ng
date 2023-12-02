@@ -28,7 +28,8 @@
             <td>
               <dt>Sequence</dt>
               <dd>
-                <%sequence = @post_replacements.where(post_id: post_replacement.post.id).ids.sort.index(post_replacement.id)%>
+                <%sequence = @post_replacements.where(post_id: post_replacement.post.id).ids.reverse.index(post_replacement.id)%>
+
                 <%=post_replacement.post_id%>:<%=sequence%>
               </dd>
               <dt>Status</dt>
