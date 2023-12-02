@@ -35,8 +35,11 @@
                 approved, current
                 <%else%>
                 approved
-                <% end %>  
-                (<%= link_to_user post_replacement.approver %>)
+                <% end %> 
+                <dt>Approver</dt>
+                <dd> 
+                <%= link_to_user post_replacement.approver %>
+                </dd>
               <% elsif post_replacement.status == 'original'%>
                 original
               <% else %>
@@ -60,7 +63,7 @@
                 <% if post_replacement.source.present? %>
                   <ul>
                     <% post_replacement.source_list.each do |source| %>
-                      <li><%= external_link_to source, truncate: 64 %></li>
+                      <li><%= external_link_to source, truncate: 46 %></li>
                     <% end %>
                   </ul>
                 <% else %>
