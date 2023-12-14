@@ -10,7 +10,7 @@ class TagQuery
   ].freeze
 
   NEGATABLE_METATAGS = %w[
-    id filetype type rating description parent user user_id approver flagger deletedby delreason
+    id filetype type rating description parent user user_id approver disapprover flagger deletedby delreason
     source status pool set fav favoritedby note locked upvote votedup downvote voteddown voted
     width height mpixels ratio filesize duration score favcount date age change tagcount
     commenter comm noter noteupdater
@@ -182,21 +182,7 @@ class TagQuery
           end
 
           post_set_id
-        end
-#
-      when "disapprovals", "-disapprovals", "~disapprovals"
-        add_to_query(type, :set_ids) do
-          post_set_id = PostDisapproval.name_to_id(g2)
-          post_set = PostDisapproval.find_by(id: post_set_id)
 
-          next 0 unless post_set
-          unless post_set.can_view?(CurrentUser.user)
-            raise User::PrivilegeError
-          end
-
-          post_set_id
-        end
-#
       when "fav", "-fav", "~fav", "favoritedby", "-favoritedby", "~favoritedby"
         add_to_query(type, :fav_ids) do
           favuser = User.find_by_name_or_id(g2) # rubocop:disable Rails/DynamicFindBy
