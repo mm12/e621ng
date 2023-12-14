@@ -141,7 +141,13 @@ class TagQuery
           user_id = User.name_or_id_to_id(g2)
           id_or_invalid(user_id)
         end
-
+#
+      when "disapprover", "-disapprover", "~disapprover"
+        add_to_query(type, :disapprover_ids, any_none_key: :disapprover, value: g2) do
+          user_id = User.name_or_id_to_id(g2)
+          id_or_invalid(user_id)
+        end
+#
       when "commenter", "-commenter", "~commenter", "comm", "-comm", "~comm"
         add_to_query(type, :commenter_ids, any_none_key: :commenter, value: g2) do
           user_id = User.name_or_id_to_id(g2)
@@ -177,7 +183,20 @@ class TagQuery
 
           post_set_id
         end
+#
+      when "disapprovals", "-disapprovals", "~disapprovals"
+        add_to_query(type, :set_ids) do
+          post_set_id = PostDisapproval.name_to_id(g2)
+          post_set = PostDisapproval.find_by(id: post_set_id)
 
+          next 0 unless post_set
+          unless post_set.can_view?(CurrentUser.user)
+            raise User::PrivilegeError
+          end
+
+          post_set_id
+        end
+#
       when "fav", "-fav", "~fav", "favoritedby", "-favoritedby", "~favoritedby"
         add_to_query(type, :fav_ids) do
           favuser = User.find_by_name_or_id(g2) # rubocop:disable Rails/DynamicFindBy
