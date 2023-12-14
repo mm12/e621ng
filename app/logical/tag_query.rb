@@ -182,6 +182,7 @@ class TagQuery
           end
 
           post_set_id
+        end
 
       when "fav", "-fav", "~fav", "favoritedby", "-favoritedby", "~favoritedby"
         add_to_query(type, :fav_ids) do
