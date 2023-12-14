@@ -1879,7 +1879,7 @@ class PostTest < ActiveSupport::TestCase
       assert_tag_match(posts.reverse, "order:note_count_desc")
       assert_tag_match(posts.reverse, "order:notes")
       assert_tag_match(posts.reverse, "order:notes_desc")
-
+      # TODO: Disapproval tests
       assert_tag_match(posts, "order:id_asc")
       assert_tag_match(posts, "order:score_asc")
       assert_tag_match(posts, "order:favcount_asc")

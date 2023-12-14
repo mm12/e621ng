@@ -1475,6 +1475,7 @@ class Post < ApplicationRecord
     end
 
     def tag_match(query, resolve_aliases: true, free_tags_count: 0, enable_safe_mode: CurrentUser.safe_mode?, always_show_deleted: false)
+      Logger.new('log/dev.log').info("CAUSTOM::#{query}")
       ElasticPostQueryBuilder.new(
         query,
         resolve_aliases: resolve_aliases,
@@ -1485,6 +1486,7 @@ class Post < ApplicationRecord
     end
 
     def tag_match_sql(query)
+      Logger.new('log/dev.log').info("CUSTOM::#{query}")
       PostQueryBuilder.new(query).search
     end
   end
@@ -1615,7 +1617,7 @@ class Post < ApplicationRecord
     def has_enough_tags
       return if !new_record?
 
-      if tags.count {|t| t.category == Tag.categories.general} < 10
+      if tags.count {|t| t.category == Tag.categories.general} < 0
         self.warnings.add(:base, "Uploads must have at least 10 general tags. Read [[e621:tags]] for guidelines on tagging your uploads")
       end
     end

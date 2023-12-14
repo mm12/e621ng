@@ -38,6 +38,7 @@ class PostQueryBuilder
     relation = add_array_range_relation(relation, q[:height], "posts.image_height")
     relation = add_array_range_relation(relation, q[:score], "posts.score")
     relation = add_array_range_relation(relation, q[:fav_count], "posts.fav_count")
+    relation = add_array_range_relation(relation, q[:dis_count], "posts.disapprovals.count")
     relation = add_array_range_relation(relation, q[:filesize], "posts.file_size")
     relation = add_array_range_relation(relation, q[:change_seq], "posts.change_seq")
     relation = add_array_range_relation(relation, q[:date], "posts.created_at")
@@ -113,6 +114,28 @@ class PostQueryBuilder
 
     q[:approver_ids_must_not]&.each do |approver_id|
       relation = relation.where.not("posts.approver_id": approver_id)
+    end
+
+    if q[:disapprover] == "any"
+      relation = relation.where("posts.disapprover_id is not null")
+    elsif q[:disapprover] == "none"
+      relation = relation.where("posts.disapprover_id is null")
+    end
+
+    q[:disapprover_ids]&.each do |disapprover_id|
+      relation = relation.where("posts.disapprover_id": disapprover_id)
+    end
+
+    q[:disapprover_ids_must_not]&.each do |disapprover_id|
+      relation = relation.where.not("posts.disapprover_id": disapprover_id)
+    end
+
+    q[:dis_count]&.each do |disapprover_id|
+      relation = relation.where("posts.disapprover_id": disapprover_id)
+    end
+
+    q[:dis_count_must_not]&.each do |disapprover_id|
+      relation = relation.where.not("posts.disapprover_id": disapprover_id)
     end
 
     if q[:commenter] == "any"
