@@ -103,7 +103,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
 
     add_array_relation(:uploader_ids, :uploader)
     add_array_relation(:approver_ids, :approver, any_none_key: :approver)
-    add_array_relation(:disapprover_ids, :approver, any_none_key: :approver)
+    add_array_relation(:disapprover_ids, :approver, any_none_key: :approver) #hmm
     add_array_relation(:commenter_ids, :commenters, any_none_key: :commenter)
     add_array_relation(:noter_ids, :noters, any_none_key: :noter)
     add_array_relation(:note_updater_ids, :noters) # Broken, index field missing

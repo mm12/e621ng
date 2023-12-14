@@ -253,7 +253,7 @@ module PostIndex
       notes:        options[:notes]      || ::Note.active.where(post_id: id).pluck(:body),
       uploader:     uploader_id,
       approver:     approver_id,
-      disapprover:  disapprover_id       || PostDisapproval.where(post_id: posts.id).user_id,
+      disapprover:  disapprover_id       || ::PostDisapproval.where(post_id: posts.id).user_id,
       deleter:      options[:deleter]    || ::PostFlag.where(post_id: id, is_resolved: false, is_deletion: true).order(id: :desc).first&.creator_id,
       del_reason:   options[:del_reason] || ::PostFlag.where(post_id: id, is_resolved: false, is_deletion: true).order(id: :desc).first&.reason&.downcase,
       width:        image_width,
