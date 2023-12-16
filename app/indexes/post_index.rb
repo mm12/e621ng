@@ -202,7 +202,7 @@ module PostIndex
             notes:         notes[p.id]          || empty,
             deleter:       deleter_ids[p.id]    || empty,
             del_reason:    del_reasons[p.id]    || empty,
-            disapprover:   disapprovers[p.id]   || empty,
+           # disapprover:   disapprovers[p.id]   || empty,
             has_pending_replacements: pending_replacements[p.id]
           }
 
@@ -260,7 +260,7 @@ module PostIndex
       notes:        options[:notes]      || ::Note.active.where(post_id: id).pluck(:body),
       uploader:     uploader_id,
       approver:     approver_id,
-      disapprover:  options[:disapprover]   || ::PostDisapproval.where(post_id: id).pluck(:user_id),
+      disapprover:  parent_id,#   || ::PostDisapproval.where(post_id: id).pluck(:user_id),
       deleter:      options[:deleter]    || ::PostFlag.where(post_id: id, is_resolved: false, is_deletion: true).order(id: :desc).first&.creator_id,
       del_reason:   options[:del_reason] || ::PostFlag.where(post_id: id, is_resolved: false, is_deletion: true).order(id: :desc).first&.reason&.downcase,
       width:        image_width,
