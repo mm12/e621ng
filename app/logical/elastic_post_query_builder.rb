@@ -176,10 +176,6 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       must.push({term: {has_pending_replacements: q[:pending_replacements]}})
     end
 
-    # if q.include?(:disapprover)
-    #   must.push({term: {disapprover: q[:disapprover]}})
-    # end
-
     add_tag_string_search_relation(q[:tags])
 
     case q[:order]
