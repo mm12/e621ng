@@ -245,6 +245,9 @@ class TagQuery
       when "score", "-score", "~score"
         add_to_query(type, :score) { ParseValue.range(g2) }
 
+      when "disapprovals", "-disapprovals", "~disapprovals"
+        add_to_query(type, :disapproval) { ParseValue.range(g2) }
+
       when "favcount", "-favcount", "~favcount"
         add_to_query(type, :fav_count) { ParseValue.range(g2) }
 
