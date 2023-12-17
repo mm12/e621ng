@@ -103,7 +103,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
 
     add_array_relation(:uploader_ids, :uploader)
     add_array_relation(:approver_ids, :approver, any_none_key: :approver)
-    add_array_relation(:disapprover_ids, :disapprover, any_none_key: :disapprover, action: :wildcard) #hmm
+    add_array_relation(:disapprover_ids, :disapprover, any_none_key: :disapprover) #hmm
     add_array_relation(:commenter_ids, :commenters, any_none_key: :commenter)
     add_array_relation(:noter_ids, :noters, any_none_key: :noter)
     add_array_relation(:note_updater_ids, :noters) # Broken, index field missing
@@ -176,9 +176,9 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       must.push({term: {has_pending_replacements: q[:pending_replacements]}})
     end
 
-    if q.include?(:disapprover)
-      must.push({term: {disapprover: q[:disapprover]}})
-    end
+    # if q.include?(:disapprover)
+    #   must.push({term: {disapprover: q[:disapprover]}})
+    # end
 
     add_tag_string_search_relation(q[:tags])
 
@@ -317,9 +317,6 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       end
 
       order.push({_score: :desc})
-
-    when "dis"
-      order.push(disapprover:{order: :asc, missing: :_first})
 
     else
       order.push({id: :desc})

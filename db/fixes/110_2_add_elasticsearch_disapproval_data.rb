@@ -4,5 +4,5 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'config',
 
 Post.find_each do |post|
   puts post.id
-  post.document_store.client.update_document_attributes disapprover: PostDisapproval.where(post_id: post.id).pluck(:user_id)
+  post.document_store.client.update_document_attributes disapprover: post.disapprovals.pluck(:user_id)
 end
