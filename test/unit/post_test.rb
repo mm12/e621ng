@@ -1660,6 +1660,43 @@ class PostTest < ActiveSupport::TestCase
       assert_tag_match([posts[1]], "commenter:none")
     end
 
+    should "Return posts for the disapprover:<name> metatag" do
+      # users = create_list(:user, 2)
+      # posts = users.map do |u|
+      #   as(u) do
+      #     post = create(:post, tag_string: "abc")
+      #     post
+      #   end
+      # end
+      
+      # create(:post_disapproval, post: posts[0])
+      # assert_tag_match(posts[0], "disapprover:admin")
+      # assert_tag_match(posts[1], "disapprover:admin")
+      # assert_tag_match(posts[2], "disapprover:admin")
+    end
+
+    should "Return posts for the disapprover:<any|none> metatag" do
+      # posts = create_list(:post, 3)
+      # create(:post_disapproval, post: posts[0])
+      # assert_tag_match(posts[0], "disapprover:any")
+      # assert_tag_match(posts[1], "disapprover:none")
+      # assert_tag_match(posts[2], "disapprover:none")
+    end
+
+    should "Return posts for the disapprovals:<n> metatag" do
+      # posts = create_list(:post, 3)
+      # create(:post_disapproval, post: posts[0])
+      # assert_tag_match(posts[0], "disapprovals:1")
+      # assert_tag_match(posts[0], "disapprovals:>0")
+      # assert_tag_match(posts[0], "disapprovals:>=0")
+    end
+
+    should "Return posts for the disapprovals:<any|none> metatag" do
+      # posts = create_list(:post, 3)
+      # create(:post_disapproval, post: posts[0])
+      # assert_tag_match(posts[0], "disapprovals:>0")
+    end
+
     should "return posts for the noter:<name> metatag" do
       users = create_list(:user, 2)
       posts = create_list(:post, 2)
@@ -1865,6 +1902,7 @@ class PostTest < ActiveSupport::TestCase
       assert_tag_match(posts.reverse, "order:change")
       assert_tag_match(posts.reverse, "order:comment")
       assert_tag_match(posts.reverse, "order:comment_bumped")
+      assert_tag_match(posts.reverse, "order:disapproval_desc")
       assert_tag_match(posts.reverse, "order:note")
       assert_tag_match(posts.reverse, "order:mpixels")
       assert_tag_match(posts.reverse, "order:portrait")
@@ -1879,13 +1917,14 @@ class PostTest < ActiveSupport::TestCase
       assert_tag_match(posts.reverse, "order:note_count_desc")
       assert_tag_match(posts.reverse, "order:notes")
       assert_tag_match(posts.reverse, "order:notes_desc")
-      # TODO: Disapproval tests
+
       assert_tag_match(posts, "order:id_asc")
       assert_tag_match(posts, "order:score_asc")
       assert_tag_match(posts, "order:favcount_asc")
       assert_tag_match(posts, "order:change_asc")
       assert_tag_match(posts, "order:comment_asc")
       assert_tag_match(posts, "order:comment_bumped_asc")
+      assert_tag_match(posts, "order:disapproval_asc")
       assert_tag_match(posts, "order:note_asc")
       assert_tag_match(posts, "order:mpixels_asc")
       assert_tag_match(posts, "order:landscape")

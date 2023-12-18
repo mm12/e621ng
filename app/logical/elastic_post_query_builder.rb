@@ -290,6 +290,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
 
     when "disapprovals", "disapprovals_desc"
       order.push(dis_count: {order: :desc, missing: :_last})
+
     when "disapprovals_asc"
       order.push(dis_count: {order: :asc, missing: :_first})
 
