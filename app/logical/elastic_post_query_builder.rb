@@ -288,7 +288,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       order.push({"tag_count_#{TagCategory::SHORT_NAME_MAPPING[$1]}" => :asc})
 
     when "disapprovals"
-      order.push({disapprovals: :desc})
+      order.push({disapproval: :desc})
 
     when "rank"
       @function_score = {

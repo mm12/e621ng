@@ -6,4 +6,3 @@ Post.find_each do |post|
   puts post.id
   post.document_store.client.update_document_attributes has_pending_replacements: post.replacements.pending.any?
 end
-#post.document_store.client.update(index: index, id:1, body:{doc:{disapprover:[1]}})
