@@ -13,7 +13,7 @@ class TagQuery
     id filetype type rating description parent user user_id approver disapprover flagger deletedby delreason
     source status pool set fav favoritedby note locked upvote votedup downvote voteddown voted
     width height mpixels ratio filesize duration score favcount date age change tagcount
-    commenter comm noter noteupdater disapprover
+    commenter comm noter noteupdater disapprovals
   ] + TagCategory::SHORT_NAME_LIST.map { |tag_name| "#{tag_name}tags" }
 
   METATAGS = %w[
@@ -246,7 +246,7 @@ class TagQuery
         add_to_query(type, :score) { ParseValue.range(g2) }
 
       when "disapprovals", "-disapprovals", "~disapprovals"
-        add_to_query(type, :disapproval) { ParseValue.range(g2) }
+        add_to_query(type, :disapprovals) { ParseValue.range(g2) }
 
       when "favcount", "-favcount", "~favcount"
         add_to_query(type, :fav_count) { ParseValue.range(g2) }

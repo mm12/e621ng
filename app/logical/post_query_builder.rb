@@ -38,7 +38,7 @@ class PostQueryBuilder
     relation = add_array_range_relation(relation, q[:height], "posts.image_height")
     relation = add_array_range_relation(relation, q[:score], "posts.score")
     relation = add_array_range_relation(relation, q[:fav_count], "posts.fav_count")
-    relation = add_array_range_relation(relation, q[:disapprovals], "posts.disapprovals.count")
+    relation = add_array_range_relation(relation, q[:disapproval_count], "posts.disapprovals.count")
     relation = add_array_range_relation(relation, q[:filesize], "posts.file_size")
     relation = add_array_range_relation(relation, q[:change_seq], "posts.change_seq")
     relation = add_array_range_relation(relation, q[:date], "posts.created_at")
