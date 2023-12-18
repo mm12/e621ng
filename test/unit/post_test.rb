@@ -1660,7 +1660,43 @@ class PostTest < ActiveSupport::TestCase
       assert_tag_match([posts[1]], "commenter:none")
     end
 
-    # disapproval search tests here
+    should "Return posts for the disapprover:<name> metatag" do
+      users = create_list(:user, 2)
+      posts = users.map do |u|
+        as(u) do
+          post = create(:post, tag_string: "abc")
+          FavoriteManager.add!(user: u, post: post)
+          post
+        end
+      end
+      
+      create(:post_disapproval, post: posts[0])
+      assert_tag_match(posts[0], "disapprover:admin")
+      assert_tag_match(posts[1], "disapprover:admin")
+      assert_tag_match(posts[2], "disapprover:admin")
+    end
+
+    should "Return posts for the disapprover:<any|none> metatag" do
+      posts = create_list(:post, 3)
+      create(:post_disapproval, post: posts[0])
+      assert_tag_match(posts[0], "disapprover:any")
+      assert_tag_match(posts[1], "disapprover:none")
+      assert_tag_match(posts[2], "disapprover:none")
+    end
+
+    should "Return posts for the disapprovals:<n> metatag" do
+      posts = create_list(:post, 3)
+      create(:post_disapproval, post: posts[0])
+      assert_tag_match(posts[0], "disapprovals:1")
+      assert_tag_match(posts[0], "disapprovals:>0")
+      assert_tag_match(posts[0], "disapprovals:>=0")
+    end
+
+    should "Return posts for the disapprovals:<any|none> metatag" do
+      posts = create_list(:post, 3)
+      create(:post_disapproval, post: posts[0])
+      assert_tag_match(posts[0], "disapprovals:>0")
+    end
 
     should "return posts for the noter:<name> metatag" do
       users = create_list(:user, 2)
