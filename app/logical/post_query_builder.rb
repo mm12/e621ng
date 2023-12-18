@@ -23,7 +23,6 @@ class PostQueryBuilder
     values&.each do |value|
       relation = relation.add_range_relation(value, field)
     end
-    
     relation
   end
 
@@ -182,7 +181,7 @@ class PostQueryBuilder
     q[:rating_must_not]&.each do |rating|
       relation = relation.where("posts.rating = ?", rating)
     end
-    
+
     add_tag_string_search_relation(q[:tags], relation)
   end
 end

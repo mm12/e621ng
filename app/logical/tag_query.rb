@@ -141,13 +141,13 @@ class TagQuery
           user_id = User.name_or_id_to_id(g2)
           id_or_invalid(user_id)
         end
-#
+
       when "disapprover", "-disapprover", "~disapprover"
         add_to_query(type, :disapprover_ids, any_none_key: :disapprover, value: g2) do
           user_id = User.name_or_id_to_id(g2)
           id_or_invalid(user_id)
         end
-#
+
       when "commenter", "-commenter", "~commenter", "comm", "-comm", "~comm"
         add_to_query(type, :commenter_ids, any_none_key: :commenter, value: g2) do
           user_id = User.name_or_id_to_id(g2)
