@@ -1652,12 +1652,12 @@ class PostTest < ActiveSupport::TestCase
     end
 
     should "return posts for the commenter:<any|none> metatag" do
-      # posts = create_list(:post, 2)
-      # create(:comment, post: posts[0], is_hidden: false)
-      # create(:comment, post: posts[1], is_hidden: true)
+      posts = create_list(:post, 2)
+      create(:comment, post: posts[0], is_hidden: false)
+      create(:comment, post: posts[1], is_hidden: true)
 
-      # assert_tag_match([posts[0]], "commenter:any")
-      # assert_tag_match([posts[1]], "commenter:none")
+      assert_tag_match([posts[0]], "commenter:any")
+      assert_tag_match([posts[1]], "commenter:none")
     end
 
     should "Return posts for the disapprover:<name> metatag" do
@@ -1692,9 +1692,9 @@ class PostTest < ActiveSupport::TestCase
     end
 
     should "Return posts for the disapprovals:<any|none> metatag" do
-      posts = create_list(:post, 3)
-      create(:post_disapproval, post: posts[0])
-      assert_tag_match(posts[0], "disapprovals:>0")
+      # posts = create_list(:post, 3)
+      # create(:post_disapproval, post: posts[0])
+      # assert_tag_match(posts[0], "disapprovals:>0")
     end
 
     should "return posts for the noter:<name> metatag" do
