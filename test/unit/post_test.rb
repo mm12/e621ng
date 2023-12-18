@@ -1897,7 +1897,7 @@ class PostTest < ActiveSupport::TestCase
       assert_tag_match(posts, "order:copytags_asc")
       assert_tag_match(posts, "order:note_count_asc")
       assert_tag_match(posts, "order:notes_asc")
-    end
+    end #TODO: Disapproval tests
 
     should "return posts for order:comment_bumped" do
       post1 = create(:post)
