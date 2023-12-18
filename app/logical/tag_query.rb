@@ -171,6 +171,9 @@ class TagQuery
           Pool.name_to_id(g2)
         end
 
+      when "disapprovals", "-disapprovals", "~disapprovals"
+        add_to_query(type, :dis_count, any_none_key: :disapprover, value: g2) { ParseValue.range(g2) }
+
       when "set", "-set", "~set"
         add_to_query(type, :set_ids) do
           post_set_id = PostSet.name_to_id(g2)
@@ -244,9 +247,6 @@ class TagQuery
 
       when "score", "-score", "~score"
         add_to_query(type, :score) { ParseValue.range(g2) }
-
-      when "disapprovals", "-disapprovals", "~disapprovals"
-        add_to_query(type, :disapprovals) { ParseValue.range(g2) }
 
       when "favcount", "-favcount", "~favcount"
         add_to_query(type, :fav_count) { ParseValue.range(g2) }

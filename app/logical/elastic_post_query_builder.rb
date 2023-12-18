@@ -104,7 +104,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     add_array_relation(:uploader_ids, :uploader)
     add_array_relation(:approver_ids, :approver, any_none_key: :approver)
     add_array_relation(:disapprover_ids, :disapprover, any_none_key: :disapprover) #hmm
-    add_array_relation(:disapprovals, :disapproval_count, any_none_key: :disapproval_count) #hmm
+    add_array_relation(:dis_count, :disapproval_count, any_none_key: :disapproval_count) #hmm
     add_array_relation(:commenter_ids, :commenters, any_none_key: :commenter)
     add_array_relation(:noter_ids, :noters, any_none_key: :noter)
     add_array_relation(:note_updater_ids, :noters) # Broken, index field missing
@@ -287,8 +287,10 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     when /(#{TagCategory::SHORT_NAME_REGEX})tags_asc/
       order.push({"tag_count_#{TagCategory::SHORT_NAME_MAPPING[$1]}" => :asc})
 
-    when "disapprovals"
+    when "disapprovals", "disapprovals_desc"
       order.push(disapproval_count:{order: :desc, missing: :_last})
+    when "disapprovals_asc"
+      order.push(disapproval_count:{order: :asc, missing: :_first})
 
     when "rank"
       @function_score = {
