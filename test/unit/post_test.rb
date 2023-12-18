@@ -1668,7 +1668,7 @@ class PostTest < ActiveSupport::TestCase
       #     post
       #   end
       # end
-      
+
       # create(:post_disapproval, post: posts[0])
       # assert_tag_match(posts[0], "disapprover:admin")
       # assert_tag_match(posts[1], "disapprover:admin")
