@@ -61,7 +61,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     end
 
     add_array_range_relation(:post_tag_count, :tag_count)
-    add_array_range_relation(:disapprovals, :dis_count) #hmmmmmmm
+    add_array_range_relation(:disa_count, :dis_count) #hmmmmmmm
 
     TagQuery::COUNT_METATAGS.map(&:to_sym).each do |column|
       if q[column]

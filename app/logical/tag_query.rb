@@ -172,7 +172,7 @@ class TagQuery
         end
 
       when "disapprovals", "-disapprovals", "~disapprovals"
-        add_to_query(type, :dis_count, any_none_key: :disapprover, value: g2) { ParseValue.range(g2) }
+        add_to_query(type, :disa_count, any_none_key: :disapprover, value: g2) { ParseValue.range(g2) }
 
       when "set", "-set", "~set"
         add_to_query(type, :set_ids) do
