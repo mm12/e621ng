@@ -32,6 +32,8 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     if @enable_safe_mode
       must.push({term: {rating: "s"}})
     end
+    Logger.new('log/dev.log').info("bbbb::#{q.to_json}")
+
 
     if q[:post_id]
       relation = range_relation(q[:post_id], :id)
@@ -104,7 +106,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     add_array_relation(:uploader_ids, :uploader)
     add_array_relation(:approver_ids, :approver, any_none_key: :approver)
     add_array_relation(:disapprover_ids, :disapprover, any_none_key: :disapprover) #hmm
-    add_array_relation(:dis_count, :disapproval_count, any_none_key: :disapproval_count) #hmm
+    add_array_relation(:dis_count, :disapproval, any_none_key: :disapprover) #hmm
     add_array_relation(:commenter_ids, :commenters, any_none_key: :commenter)
     add_array_relation(:noter_ids, :noters, any_none_key: :noter)
     add_array_relation(:note_updater_ids, :noters) # Broken, index field missing
@@ -288,9 +290,9 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       order.push({"tag_count_#{TagCategory::SHORT_NAME_MAPPING[$1]}" => :asc})
 
     when "disapprovals", "disapprovals_desc"
-      order.push(disapproval_count:{order: :desc, missing: :_last})
+      order.push(dis_count:{order: :desc, missing: :_last})
     when "disapprovals_asc"
-      order.push(disapproval_count:{order: :asc, missing: :_first})
+      order.push(dis_count:{order: :asc, missing: :_first})
 
     when "rank"
       @function_score = {
