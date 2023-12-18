@@ -87,6 +87,7 @@ class ElasticQueryBuilder
     if q[:"#{key}_should"]
       should.concat(q[:"#{key}_should"].map { |x| range_relation(x, index_field) })
     end
+    
   end
 
   def add_array_relation(key, index_field, any_none_key: nil, action: :term)

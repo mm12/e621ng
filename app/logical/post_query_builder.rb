@@ -23,6 +23,7 @@ class PostQueryBuilder
     values&.each do |value|
       relation = relation.add_range_relation(value, field)
     end
+    
     relation
   end
 
