@@ -1660,6 +1660,8 @@ class PostTest < ActiveSupport::TestCase
       assert_tag_match([posts[1]], "commenter:none")
     end
 
+    # disapproval search tests here
+
     should "return posts for the noter:<name> metatag" do
       users = create_list(:user, 2)
       posts = create_list(:post, 2)
@@ -1865,6 +1867,7 @@ class PostTest < ActiveSupport::TestCase
       assert_tag_match(posts.reverse, "order:change")
       assert_tag_match(posts.reverse, "order:comment")
       assert_tag_match(posts.reverse, "order:comment_bumped")
+      assert_tag_match(posts.reverse, "order:disapproval_desc")
       assert_tag_match(posts.reverse, "order:note")
       assert_tag_match(posts.reverse, "order:mpixels")
       assert_tag_match(posts.reverse, "order:portrait")
@@ -1879,13 +1882,14 @@ class PostTest < ActiveSupport::TestCase
       assert_tag_match(posts.reverse, "order:note_count_desc")
       assert_tag_match(posts.reverse, "order:notes")
       assert_tag_match(posts.reverse, "order:notes_desc")
-      # TODO: Disapproval tests
+
       assert_tag_match(posts, "order:id_asc")
       assert_tag_match(posts, "order:score_asc")
       assert_tag_match(posts, "order:favcount_asc")
       assert_tag_match(posts, "order:change_asc")
       assert_tag_match(posts, "order:comment_asc")
       assert_tag_match(posts, "order:comment_bumped_asc")
+      assert_tag_match(posts, "order:disapproval_asc")
       assert_tag_match(posts, "order:note_asc")
       assert_tag_match(posts, "order:mpixels_asc")
       assert_tag_match(posts, "order:landscape")
