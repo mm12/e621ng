@@ -316,5 +316,7 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     else
       order.push({id: :desc})
     end
+
+    #Logger.new('log/dev.log').info("epqb q:: #{q.to_json}")
   end
 end

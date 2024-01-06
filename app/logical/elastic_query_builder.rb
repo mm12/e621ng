@@ -2,6 +2,7 @@ class ElasticQueryBuilder
   attr_accessor :q, :must, :must_not, :should, :order
 
   def initialize(query)
+    Logger.new('log/dev.log').info("eqb init query:: #{query.to_json}")
     @q = query
     @must = [] # These terms are ANDed together
     @must_not = [] # These terms are NOT ANDed together
@@ -37,6 +38,7 @@ class ElasticQueryBuilder
     }
 
     model_class.document_store.search(search_body)
+    Logger.new('log/dev.log').info("eqb search body:: #{search_body.to_json}")
   end
 
   def match_any(*args)

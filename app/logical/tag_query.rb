@@ -43,9 +43,10 @@ class TagQuery
   attr_reader :q, :resolve_aliases
 
   def initialize(query, resolve_aliases: true, free_tags_count: 0)
+    Logger.new('log/dev.log').info("tq init query:: #{query.to_json}")
     @q = {
       tags: {
-        must: [],
+        must: [ ],
         must_not: [],
         should: [],
       },
