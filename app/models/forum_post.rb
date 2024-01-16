@@ -226,5 +226,6 @@ class ForumPost < ApplicationRecord
     updated = updated_at
     update(body: :body)
     update(updated_at: updated)
+    topic.update(updated_at: updated)
   end
 end
