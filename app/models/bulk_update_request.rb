@@ -84,7 +84,8 @@ class BulkUpdateRequest < ApplicationRecord
           forum_topic,
           forum_post: post,
           expected_title: title,
-          skip_update: !TagRelationship::SUPPORT_HARD_CODED
+          skip_update: !TagRelationship::SUPPORT_HARD_CODED,
+          no_bump: true
         )
       end
     end

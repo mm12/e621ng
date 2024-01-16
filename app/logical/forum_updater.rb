@@ -6,6 +6,7 @@ class ForumUpdater
     @forum_post = options[:forum_post]
     @expected_title = options[:expected_title]
     @skip_update = options[:skip_update]
+    @no_bump = options[:no_bump]
   end
 
   def update(message, title_tag = nil)
@@ -30,9 +31,13 @@ class ForumUpdater
       forum_topic.update(:title => "[#{title_tag}] #{forum_topic.title}")
     end
   end
-
+#a = ForumUpdater.new(1, no_bump: true)
   def update_post(body)
     return if @skip_update
-    forum_post.update(body: "#{forum_post.body}\n\nEDIT: #{body}")
+    if @no_bump
+      forum_post.nobump_update(body: "#{forum_post.body}\n\nEDIT: #{body}")
+    else
+      forum_post.update(body: "#{forum_post.body}\n\nEDIT: #{body}") 
+    end
   end
 end

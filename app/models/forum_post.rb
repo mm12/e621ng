@@ -221,4 +221,10 @@ class ForumPost < ApplicationRecord
 
     true
   end
+
+  def nobump_update(body)
+    updated = updated_at
+    update(body: :body)
+    update(updated_at: updated)
+  end
 end

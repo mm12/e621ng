@@ -199,7 +199,8 @@ class TagImplication < TagRelationship
         forum_topic,
         forum_post: post,
         expected_title: TagImplicationRequest.topic_title(antecedent_name, consequent_name),
-        skip_update: !TagRelationship::SUPPORT_HARD_CODED
+        skip_update: !TagRelationship::SUPPORT_HARD_CODED,
+        no_bump: true
       )
     end
 
