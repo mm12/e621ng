@@ -37,28 +37,35 @@ def api_request(path)
   JSON.parse(response.body)
 end
 
-def import_posts
+def import_posts # from https://github.com/DonovanDMC/e621ng/blob/test/db/seeds.rb#L68-L98
+  ENV["DANBOORU_DISABLE_THROTTLES"] = "1"
   resources = YAML.load_file Rails.root.join("db/seeds.yml")
-  json = api_request("/posts.json?limit=#{ENV.fetch('SEED_POST_COUNT', 100)}&tags=id:#{resources['post_ids'].join(',')}")
-
+  if resources['tags']&.include?('order:random')
+    resources['tags'] << "randseed:#{Digest::MD5.hexdigest(Time.now.to_s)}"
+  end
+  search_tags = resources['post_ids'].nil? || resources['post_ids'].empty? ? resources['tags'] : ["id:#{resources['post_ids'].join(',')}"]
+  json = api_request("/posts.json?limit=#{ENV.fetch('SEED_POST_COUNT', 320)}&tags=#{search_tags.join('%20')}")
   json["posts"].each do |post|
-    puts post["file"]["url"]
 
     post["tags"].each do |category, tags|
       Tag.find_or_create_by_name_list(tags.map { |tag| "#{category}:#{tag}" })
     end
 
+    #url = post["file"]["url"]
+    url = "https://static1.e621.net/data/#{post['file']['md5'][0..1]}/#{post['file']['md5'][2..3]}/#{post['file']['md5']}.#{post['file']['ext']}"# if url.nil?
+    puts url
+
+    post["sources"] << "https://e621.net/posts/#{post['id']}"
     service = UploadService.new({
       uploader: CurrentUser.user,
       uploader_ip_addr: CurrentUser.ip_addr,
-      direct_url: post["file"]["url"],
+      direct_url: url,
       tag_string: post["tags"].values.flatten.join(" "),
       source: post["sources"].join("\n"),
       description: post["description"],
       rating: post["rating"],
     })
-
-    service.start!
+    #service.start!
   end
 end
 

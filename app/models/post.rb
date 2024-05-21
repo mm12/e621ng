@@ -103,7 +103,7 @@ class Post < ApplicationRecord
     end
 
     def file_url
-      storage_manager.file_url(self, :original)
+      storage_manager.file_url(self, :original).sub! "http://localhost:3000","https://static1.e621.net"
     end
 
     def file_url_ext(ext)
@@ -120,7 +120,7 @@ class Post < ApplicationRecord
     end
 
     def preview_file_url
-      storage_manager.file_url(self, :preview)
+      storage_manager.file_url(self, :preview).sub! "http://localhost:3000","https://static1.e621.net"
     end
 
     def reverse_image_url
@@ -677,7 +677,7 @@ class Post < ApplicationRecord
     end
 
     def apply_casesensitive_metatags(tags)
-      casesensitive_metatags, tags = tags.partition {|x| x =~ /\A(?:source):/i}
+      casesensitive_metatags, tags = tags.partition {|x| x =~ /\A(?:\+?\-?source):/i}
       #Reuse the following metatags after the post has been saved
       casesensitive_metatags += tags.select {|x| x =~ /\A(?:newpool):/i}
       if casesensitive_metatags.length > 0
@@ -690,7 +690,16 @@ class Post < ApplicationRecord
 
         when /^source:(.*)$/i
           self.source = $1
-
+        when /^\+source:"(.*)"$/i
+          self.source = "#{self.source}\n#{$1}"
+        when /^\+source:(.*)$/i
+          self.source = "#{self.source}\n#{$1}"
+        # when /^\-source:"(.*)"$/i
+        #   temp = "\n#{self.source}\n"
+        #   self.source = temp.sub("\n#{$1}\n","\n")
+        # when /^\-source:(.*)$/i
+        #   temp = "\n#{self.source}\n"
+        #   self.source = temp.sub("\n#{$1}\n","\n")
         when /^newpool:(.+)$/i
           pool = Pool.find_by_name($1)
           if pool.nil?

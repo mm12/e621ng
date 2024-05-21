@@ -15,11 +15,11 @@ class TagQuery
     id filetype type rating description parent user user_id approver flagger deletedby delreason
     source status pool set fav favoritedby note locked upvote votedup downvote voteddown voted
     width height mpixels ratio filesize duration score favcount date age change tagcount
-    commenter comm noter noteupdater
+    commenter comm noter noteupdater disapprover
   ] + TagCategory::SHORT_NAME_LIST.map { |tag_name| "#{tag_name}tags" }
 
   METATAGS = %w[
-    md5 order limit child randseed ratinglocked notelocked statuslocked
+    md5 order limit child randseed ratinglocked notelocked statuslocked custom
   ] + NEGATABLE_METATAGS + COUNT_METATAGS + BOOLEAN_METATAGS
 
   ORDER_METATAGS = %w[
@@ -140,6 +140,12 @@ class TagQuery
 
       when "approver", "-approver", "~approver"
         add_to_query(type, :approver_ids, any_none_key: :approver, value: g2) do
+          user_id = User.name_or_id_to_id(g2)
+          id_or_invalid(user_id)
+        end
+      # important part
+      when "disapprover", "-disapprover", "~disapprover"
+        add_to_query(type, :disapprover_ids, any_none_key: :disapproves, value: g2) do
           user_id = User.name_or_id_to_id(g2)
           id_or_invalid(user_id)
         end
@@ -273,10 +279,19 @@ class TagQuery
         q[:child] = g2.downcase
 
       when "randseed"
+        #Logger.new('log/dev.log').info("seed:#{g2.to_i}")
         q[:random_seed] = g2.to_i
+
+      when "custom"
+        q[:custom_order] = g2.to_s
+        #Logger.new('log/dev.log').info("TQ:custom:#{g2.to_s}")
 
       when "order"
         q[:order] = g2.downcase
+        q[:order_reversed] = false
+      when "-order"
+        q[:order] = g2.downcase
+        q[:order_reversed] = true
 
       when "limit"
         # Do nothing. The controller takes care of it.
@@ -306,6 +321,7 @@ class TagQuery
           user_id = User.name_or_id_to_id(g2)
           id_or_invalid(user_id)
         end
+      
 
       when "upvote", "-upvote", "~upvote", "votedup", "-votedup", "~votedup"
         add_to_query(type, :upvote) do

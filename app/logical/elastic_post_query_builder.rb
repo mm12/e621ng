@@ -97,7 +97,10 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
 
     add_array_relation(:uploader_ids, :uploader)
     add_array_relation(:approver_ids, :approver, any_none_key: :approver)
+
     add_array_relation(:commenter_ids, :commenters, any_none_key: :commenter)
+    add_array_relation(:disapprover_ids, :disapprovals, any_none_key: :disapproves)
+
     add_array_relation(:noter_ids, :noters, any_none_key: :noter)
     add_array_relation(:note_updater_ids, :noters) # Broken, index field missing
     add_array_relation(:pool_ids, :pools, any_none_key: :pool)
@@ -169,6 +172,9 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       must.push({term: {has_pending_replacements: q[:pending_replacements]}})
     end
 
+
+    
+
     add_tag_string_search_relation(q[:tags])
 
     case q[:order]
@@ -219,6 +225,12 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
 
     when "updated_asc"
       order.concat([{updated_at: :asc}, {id: :asc}])
+
+    when "up_score"
+      order.concat([{up_score: :desc}, {id: :asc}])
+
+    when "down_score"
+      order.concat([{down_score: :asc}, {id: :asc}])
 
     when "comment", "comm"
       order.push({commented_at: {order: :desc, missing: :_last}})
@@ -292,6 +304,117 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
       must.push({ range: { created_at: { gte: 2.days.ago } } })
       order.push({ _score: :desc })
 
+
+    when "dynrank"
+      @function_score = {
+        script_score: {
+          script: {
+            params: { log3: Math.log(3), date2005_05_24: 1_116_936_000 },
+            source: "Math.log(doc['score'].value) / params.log3 + (doc['created_at'].value.millis / 1000 - params.date2005_05_24) / 35000",
+          },
+        },
+      }
+      must.push({ range: { score: { gt: 0 } } })
+      must.push({ range: { created_at: { gte: (Post.last.created_at-2.days) } } })
+      direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
+      order.push(direction)
+
+    # WEIGHTS
+    #down_weight D = "-1 * doc['down_score'].value"
+    #up_weight   U = "doc['up_score'].value"
+    #com_weight  C = "doc['comment_count'].value"
+    #fav_weight  F = "doc['fav_count'].value"
+    #id_weight   I = "doc['id'].value"
+    #total_cnt   T = Post.count
+    #-----
+    #  score_ratio_i: [420*U/((D+U+1)*69)]
+    #  score_exper:   score_ratio_i+new_fs
+    #  new_fs:        [(69*U+F+C+I)/(D+(F/2)+U+T)]
+    
+    when "score_ratio_i"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "420*doc['up_score'].value / 
+            ( (-1 * doc['down_score'].value + doc['up_score'].value +1) *69)",
+          },
+        },
+      }
+      direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
+      order.push(direction)
+
+    when "score_exper"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(420*doc['up_score'].value / ( (-1 * doc['down_score'].value + doc['up_score'].value +1) *69))
+            +((69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / 
+            (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2) + (#{Post.count}) ))",
+          },
+        },
+      }
+      direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
+      order.push(direction)
+
+    when "new_fs"
+      @function_score = {
+        script_score: {
+          script: {
+            source: "(69*doc['up_score'].value+doc['fav_count'].value+doc['comment_count'].value+doc['id'].value) / 
+            (-1 * doc['down_score'].value + doc['up_score'].value +1 + (doc['fav_count'].value/2) + (#{Post.count}) )",
+          },
+        },
+      }
+      direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
+      order.push(direction)
+    when "custom"
+      time_div = Time.now.to_f*1000
+      search_terms = {
+      'U' => "doc['up_score'].value", 
+      'D' => "doc['down_score'].value*-1",
+      #'d' => "doc['down_score'].value",
+      'C' => "doc['comment_count'].value", 
+      'F' => "doc['fav_count'].value",
+      'T' => "#{Post.count}",
+      'I' => "doc['id'].value",
+      'P' => "doc['pools'].size()==0 ? 1/doc['id'].value : doc['pools'].size()",  #actually this does work
+      'S' => "doc['sets'].size()==0 ? 1/doc['id'].value : doc['sets'].size()", #actually this does work
+      'L' => "doc['duration'].size()==0 ? 1/doc['id'].value : doc['duration'].value",
+      'n' => "doc['noted_at'].size()==0 ? 1/doc['id'].value : (#{Time.now.to_f*1000}-doc['noted_at'].value.millis)/#{time_div}}",
+      'w' => "doc['width'].value",
+      'h' => "doc['height'].value",
+      'u' => "(#{Time.now.to_f*1000}-doc['updated_at'].value.millis)/#{time_div}",
+      'N' => "doc['noted_at'].size()==0 ? 1/doc['id'].value : doc['noted_at'].size()",
+      'f' => "doc['file_size'].value",
+      'r' => "doc['aspect_ratio'].value",
+      'c' => "doc['comment_bumped_at'].size()==0 ? 1/doc['id'].value : (#{Time.now.to_f*1000}-doc['comment_bumped_at'].value.millis)/#{time_div}",
+      'H' => "doc['children'].size()==0 ? 1/doc['id'].value : doc['children'].size()",
+      'p' => "doc['mpixels'].value",
+      'cs'=> "doc['change_seq'].value",
+      'tx'=> "doc['tag_count'].value",
+      'tg'=> "doc['tag_count_general'].value",
+      'tl'=> "doc['tag_count_lore'].value",
+      'ts'=> "doc['tag_count_species'].value",
+      'ta'=> "doc['tag_count_artist'].value",
+      'th'=> "doc['tag_count_character'].value",
+      'to'=> "doc['tag_count_copyright'].value",
+      'tm'=> "doc['tag_count_meta'].value",
+      'ti'=> "doc['tag_count_invalid'].value",
+      }
+      
+      if q[:custom_order].present?
+        custom_order = q[:custom_order]
+      else   
+        custom_order = "(420*U)/((D+U+1)*69)+((69*U+F+C+I)/(D+U+T+1+F/2))"   
+      end
+      func = custom_order.gsub(Regexp.union(search_terms.keys),search_terms) 
+      Logger.new('log/dev.log').info("CUSTOM::#{func}")
+      @function_score = {script_score: {script: {
+          source: "#{func}",
+      },},}
+      direction = q[:order_reversed] ? { _score: :asc } : { _score: :desc }
+      order.push(direction)
+
     when "random"
       if q[:random_seed].present?
         @function_score = {
@@ -304,7 +427,6 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
           boost_mode: :replace,
         }
       end
-
       order.push({_score: :desc})
 
     else
@@ -312,3 +434,4 @@ class ElasticPostQueryBuilder < ElasticQueryBuilder
     end
   end
 end
+

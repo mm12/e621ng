@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class PostDisapproval < ApplicationRecord
-  belongs_to :post
+  #self.table_name = 'post_disapprovals2'
+  belongs_to :post 
   belongs_to :user
   after_initialize :initialize_attributes, if: :new_record?
   validates :post_id, uniqueness: { :scope => [:user_id], :message => "have already hidden this post" }

@@ -136,8 +136,8 @@ class PostSerializer < ActiveModel::Serializer
   def comment_count
     object.visible_comment_count(CurrentUser)
   end
-
+  # important
   attributes :id, :created_at, :updated_at, :file, :preview, :sample, :score, :tags, :locked_tags, :change_seq, :flags,
              :rating, :fav_count, :sources, :pools, :relationships, :approver_id, :uploader_id, :description,
-             :comment_count, :is_favorited, :has_notes, :duration
+             :comment_count, :is_favorited, :has_notes, :duration, :disapprover_ids
 end
